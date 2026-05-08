@@ -15,12 +15,12 @@ export function MobileNav({ activePath }: MobileNavProps) {
   return (
     <div className="lg:hidden">
       {/* Mobile Top Bar */}
-      <div className="bg-maroon text-white px-6 py-4 flex items-center justify-between fixed top-0 left-0 right-0 z-[60] border-b-4 border-white/10 shadow-lg">
+      <div className="bg-y2k-primary text-white px-6 py-4 flex items-center justify-between fixed top-0 left-0 right-0 z-[60] border-b-4 border-white/10 shadow-[0_4px_10px_rgba(47,2,12,0.3)]">
         <Link href="/" className="flex items-center gap-2">
           <div className="bg-white p-1.5 rounded-lg shadow-inner">
-            <Camera className="w-5 h-5 text-maroon" />
+            <Camera className="w-5 h-5 text-y2k-primary" />
           </div>
-          <span className="font-script lowercase text-2xl tracking-tight">SnapBooth</span>
+          <span className="font-logo lowercase text-2xl tracking-tight text-white">SnapBooth</span>
         </Link>
         <button 
           onClick={() => setIsOpen(!isOpen)}
@@ -32,7 +32,7 @@ export function MobileNav({ activePath }: MobileNavProps) {
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 z-[55] bg-maroon text-white animate-in fade-in duration-300 font-serif">
+        <div className="fixed inset-0 z-[55] bg-y2k-primary text-white animate-in fade-in duration-300 font-serif">
           <div className="flex flex-col h-full pt-24 px-6 pb-8">
             <nav className="flex-1 space-y-4">
               <MobileItem 
@@ -60,9 +60,9 @@ export function MobileNav({ activePath }: MobileNavProps) {
 
             <div className="pt-8 border-t border-white/10 space-y-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white text-maroon flex items-center justify-center font-black text-xl shadow-lg border-2 border-white">A</div>
+                <div className="w-12 h-12 rounded-2xl bg-white text-y2k-primary flex items-center justify-center font-black text-xl shadow-lg border-2 border-white">A</div>
                 <div className="flex flex-col">
-                  <span className="text-lg font-script lowercase">Admin User</span>
+                  <span className="text-lg font-heading font-black lowercase">Admin User</span>
                   <span className="text-xs text-white/60 font-bold uppercase tracking-widest">admin@snapbooth.com</span>
                 </div>
               </div>
@@ -89,7 +89,7 @@ function MobileItem({ href, icon, label, active = false, onClick }: { href: stri
       className={`
         flex items-center gap-4 p-5 rounded-3xl transition-all font-serif
         ${active 
-          ? 'bg-white text-maroon shadow-xl shadow-black/20 font-black scale-[1.05]' 
+          ? 'bg-white text-y2k-primary shadow-xl shadow-black/20 font-black scale-[1.05]' 
           : 'text-white/60 hover:bg-white/5 hover:text-white'}
       `}
     >

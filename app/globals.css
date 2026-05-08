@@ -9,13 +9,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-serif);
   --font-serif: var(--font-serif);
-  --font-script: var(--font-script);
-  --font-heading: var(--font-script);
-  --color-maroon: #5D0E11;
-  --color-pink-pastel: #FDF2F2;
-  --color-primary: #5D0E11;
+  --font-logo: var(--font-logo);
+  --font-heading: var(--font-heading);
+  --color-y2k-bg: #F1D3DF;
+  --color-y2k-card: #F6BAD6;
+  --color-y2k-accent: #741E31;
+  --color-y2k-primary: #420D19;
+  --color-y2k-shadow: #2F020C;
+  --color-maroon: #420D19;
+  --color-pink-pastel: #F1D3DF;
+  --color-primary: #420D19;
   --color-primary-foreground: #FFFFFF;
-  --color-border: #5D0E11;
+  --color-border: #420D19;
   --radius-sm: 0.5rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
@@ -25,42 +30,42 @@
 }
 
 :root {
-  --background: #FDF2F2;
-  --foreground: #5D0E11;
-  --card: #FFFFFF;
-  --card-foreground: #5D0E11;
+  --background: #F1D3DF;
+  --foreground: #420D19;
+  --card: #F6BAD6;
+  --card-foreground: #420D19;
   --popover: #FFFFFF;
-  --popover-foreground: #5D0E11;
-  --primary: #5D0E11;
+  --popover-foreground: #420D19;
+  --primary: #420D19;
   --primary-foreground: #FFFFFF;
-  --secondary: #FDF2F2;
-  --secondary-foreground: #5D0E11;
-  --muted: #F3F4F6;
-  --muted-foreground: #6B7280;
-  --accent: #FDF2F2;
-  --accent-foreground: #5D0E11;
+  --secondary: #F6BAD6;
+  --secondary-foreground: #420D19;
+  --muted: #F1D3DF;
+  --muted-foreground: #741E31;
+  --accent: #F6BAD6;
+  --accent-foreground: #420D19;
   --destructive: #EF4444;
-  --border: #5D0E11;
-  --input: #5D0E11;
-  --ring: #5D0E11;
+  --border: #420D19;
+  --input: #420D19;
+  --ring: #420D19;
   --radius: 1.5rem;
 }
 
 @layer utilities {
   .notizblok {
     background-color: white;
-    background-image: linear-gradient(rgba(93, 14, 17, 0.1) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(66, 13, 25, 0.1) 1px, transparent 1px);
     background-size: 100% 2.5rem;
     line-height: 2.5rem;
   }
 
   .retro-outline {
-    border: 4px solid #5D0E11;
+    border: 4px solid #420D19;
   }
 
   .retro-outline-double {
-    border: 4px solid #5D0E11;
-    box-shadow: 0 0 0 4px white, 0 0 0 8px #5D0E11;
+    border: 4px solid #420D19;
+    box-shadow: 0 0 0 4px white, 0 0 0 8px #420D19;
   }
 }
 
@@ -72,6 +77,6 @@
     @apply bg-background text-foreground font-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-script;
+    @apply font-heading;
   }
 }

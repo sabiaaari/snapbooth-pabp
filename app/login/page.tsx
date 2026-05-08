@@ -25,28 +25,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF2F2] flex items-center justify-center p-4 font-serif text-[#5D0E11]">
+    <div className="min-h-screen bg-y2k-bg flex items-center justify-center p-4 font-serif text-y2k-primary">
       {/* Back Button - Outside Card */}
       <div className="fixed top-8 left-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-[#5D0E11]/60 hover:text-[#5D0E11] font-black transition-colors bg-white px-4 py-2 rounded-full border-2 border-[#5D0E11] shadow-[4px_4px_0px_0px_rgba(93,14,17,1)]">
+        <Link href="/" className="inline-flex items-center gap-2 text-y2k-primary/60 hover:text-y2k-primary font-black transition-colors bg-white px-4 py-2 rounded-full border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <ChevronLeft size={20} strokeWidth={3} />
           KEMBALI
         </Link>
       </div>
 
-      <div className="w-full max-w-md bg-white border-4 border-[#5D0E11] rounded-3xl shadow-[16px_16px_0px_0px_rgba(93,14,17,1)] p-10 space-y-12 relative overflow-hidden">
+      <div className="w-full max-w-md bg-white border-4 border-y2k-primary rounded-3xl shadow-[16px_16px_0_0_#2F020C] p-10 space-y-12 relative overflow-hidden">
         {/* Decorative Notepad Background Element */}
         <div className="absolute inset-0 notizblok opacity-5 pointer-events-none"></div>
 
         <div className="text-center space-y-4 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1 bg-[#FDF2F2] text-[#5D0E11] rounded-full text-[10px] font-black uppercase tracking-widest border-2 border-[#5D0E11] mb-2">
+          <div className="inline-flex items-center gap-2 px-4 py-1 bg-y2k-bg text-y2k-primary rounded-full text-[10px] font-black uppercase tracking-widest border-2 border-y2k-primary mb-2">
             <Sparkles size={12} />
             <span>Studio Access</span>
           </div>
-          <h1 className="text-7xl font-script text-[#5D0E11] lowercase leading-none">
+          <h1 className="text-7xl font-heading font-black text-y2k-primary lowercase leading-none">
             SnapBooth
           </h1>
-          <p className="text-xl text-[#5D0E11] font-bold italic leading-tight">
+          <p className="text-xl text-y2k-primary font-bold italic leading-tight">
             Masuk untuk menyimpan <br /> photostrip-mu!
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function LoginPage() {
           <Button 
             onClick={handleGoogleLogin}
             disabled={isAuthenticating}
-            className="w-full h-20 rounded-full border-4 border-[#5D0E11] bg-white text-[#5D0E11] hover:bg-[#FDF2F2] font-black text-xl flex items-center justify-center gap-4 transition-all active:scale-95 shadow-[8px_8px_0px_0px_rgba(93,14,17,1)] disabled:opacity-50"
+            className="w-full h-20 rounded-full border-4 border-y2k-primary bg-white text-y2k-primary hover:bg-y2k-card font-black text-xl flex items-center justify-center gap-4 transition-all active:scale-95 shadow-[8px_8px_0_0_#2F020C] disabled:opacity-50"
           >
             {isAuthenticating ? (
               <span className="animate-pulse">Membuka portal...</span>
@@ -84,13 +84,13 @@ export default function LoginPage() {
             )}
           </Button>
 
-          <p className="text-[10px] text-center text-[#5D0E11]/40 font-black uppercase tracking-widest px-8 leading-relaxed">
+          <p className="text-[10px] text-center text-y2k-primary/40 font-black uppercase tracking-widest px-8 leading-relaxed">
             Dengan masuk, kamu menyetujui syarat penggunaan & kebijakan privasi kami.
           </p>
         </div>
 
         {/* Decorative corner icon */}
-        <div className="absolute -bottom-6 -right-6 text-[#5D0E11]/5 rotate-12">
+        <div className="absolute -bottom-6 -right-6 text-y2k-primary/5 rotate-12">
           <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>

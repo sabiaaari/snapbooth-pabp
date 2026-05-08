@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Pacifico, Bitter } from "next/font/google";
+import { Pacifico, Bitter, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 
-const scriptFont = Pacifico({
+const logoFont = Pacifico({
   weight: "400",
-  variable: "--font-script",
+  variable: "--font-logo",
+  subsets: ["latin"],
+});
+
+const headingFont = Bricolage_Grotesque({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
@@ -25,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${scriptFont.variable} ${serifFont.variable} h-full antialiased`}>
-      <body className="min-h-screen bg-[#FDF2F2] font-serif text-[#5D0E11]">
+    <html lang="en" className={`${logoFont.variable} ${headingFont.variable} ${serifFont.variable} h-full antialiased`}>
+      <body className="min-h-screen bg-y2k-bg font-serif text-y2k-primary">
         <Navbar />
         <main className="pt-32 pb-20">{children}</main>
       </body>

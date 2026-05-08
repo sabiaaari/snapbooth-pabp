@@ -8,13 +8,13 @@ interface SidebarProps {
 
 export function Sidebar({ activePath }: SidebarProps) {
   return (
-    <aside className="w-64 bg-maroon text-white flex flex-col fixed inset-y-0 left-0 z-50 shadow-2xl shadow-maroon/20 hidden lg:flex border-r-4 border-white/10 font-serif">
+    <aside className="w-64 bg-y2k-primary text-white flex flex-col fixed inset-y-0 left-0 z-50 shadow-[4px_0_15px_rgba(47,2,12,0.3)] hidden lg:flex border-r-4 border-white/10 font-serif">
       {/* Brand Logo */}
       <div className="p-8 flex items-center gap-3">
-        <div className="bg-white p-2 rounded-2xl shadow-lg">
-          <Camera className="w-6 h-6 text-maroon" />
+        <div className="bg-white p-2 rounded-2xl shadow-[4px_4px_0_0_#2F020C]">
+          <Camera className="w-6 h-6 text-y2k-primary" />
         </div>
-        <span className="text-2xl font-script lowercase tracking-tight">SnapBooth</span>
+        <span className="text-2xl font-logo lowercase tracking-tight">SnapBooth</span>
       </div>
 
       {/* Navigation */}
@@ -41,10 +41,10 @@ export function Sidebar({ activePath }: SidebarProps) {
 
       {/* User Info / Logout */}
       <div className="p-4 border-t border-white/10">
-        <div className="px-4 py-4 mb-2 flex items-center gap-3 bg-white/5 rounded-2xl border border-white/5">
-          <div className="w-10 h-10 rounded-xl bg-white text-maroon flex items-center justify-center font-black text-lg shadow-inner">A</div>
+        <div className="px-4 py-4 mb-2 flex items-center gap-3 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
+          <div className="w-10 h-10 rounded-xl bg-white text-y2k-primary flex items-center justify-center font-black text-lg shadow-[2px_2px_0_0_#2F020C]">A</div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-script lowercase truncate text-white">Admin User</span>
+            <span className="text-sm font-heading font-black lowercase truncate text-white">Admin User</span>
             <span className="text-[10px] text-white/40 font-black uppercase tracking-widest truncate">admin@snapbooth.com</span>
           </div>
         </div>
@@ -62,7 +62,7 @@ function SidebarItem({ href, icon, label, active = false }: { href: string; icon
     <Link href={href} className={`
       w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all duration-200 group
       ${active 
-        ? 'bg-white text-maroon shadow-xl shadow-black/20 font-black scale-[1.02]' 
+        ? 'bg-white text-y2k-primary shadow-xl shadow-black/20 font-black scale-[1.02]' 
         : 'text-white/60 hover:bg-white/5 hover:text-white font-bold'}
     `}>
       <span className={`${active ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-200`}>
