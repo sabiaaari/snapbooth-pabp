@@ -28,24 +28,24 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-8 relative">
+    <div className="p-8 relative font-serif text-[#5D0E11]">
       {/* Floating Save Toast */}
       {showSavedToast && (
-        <div className="fixed top-8 right-8 z-[100] bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in zoom-in-95">
+        <div className="fixed top-8 right-8 z-[100] bg-[#5D0E11] text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in zoom-in-95 border-2 border-white">
           <Check size={20} />
           <span className="font-bold">Settings saved successfully!</span>
         </div>
       )}
 
-      <header className="flex items-center justify-between mb-8">
+      <header className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Booth Configuration</h1>
-          <p className="text-slate-500 mt-1">Customize your photostrip design and booth behavior.</p>
+          <h1 className="text-4xl font-script text-[#5D0E11] lowercase">Booth Configuration</h1>
+          <p className="text-[#5D0E11]/60 mt-1 font-bold">Customize your photostrip design and booth behavior.</p>
         </div>
         <Button 
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-2xl font-bold gap-2 shadow-lg shadow-purple-600/20"
+          className="bg-[#5D0E11] hover:bg-[#3d0a0c] text-white px-8 py-6 rounded-full font-black gap-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] border-2 border-[#5D0E11]"
         >
           {isSaving ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -57,28 +57,28 @@ export default function SettingsPage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-1 space-y-2">
+        <div className="lg:col-span-1 space-y-4">
           <SettingsTab active={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={<Monitor size={18} />} label="Booth Settings" />
           <SettingsTab active={activeTab === 'design'} onClick={() => setActiveTab('design')} icon={<Palette size={18} />} label="Photostrip Design" />
           <SettingsTab active={activeTab === 'layout'} onClick={() => setActiveTab('layout')} icon={<GridIcon size={18} />} label="Layout & Frames" />
           <SettingsTab active={activeTab === 'text'} onClick={() => setActiveTab('text')} icon={<Type size={18} />} label="Branding & Text" />
         </div>
 
-        <div className="lg:col-span-3 space-y-6">
-          <Card className="rounded-3xl border-slate-200 shadow-sm overflow-hidden bg-white">
-            <CardHeader className="p-8 border-b border-slate-50">
-              <CardTitle className="text-xl font-bold text-slate-900">General Configuration</CardTitle>
-              <CardDescription>Configure how the booth behaves during the event.</CardDescription>
+        <div className="lg:col-span-3 space-y-8">
+          <Card className="rounded-3xl border-4 border-[#5D0E11] shadow-[8px_8px_0px_0px_rgba(93,14,17,1)] overflow-hidden bg-white">
+            <CardHeader className="p-8 border-b-2 border-[#5D0E11]/10 bg-[#FDF2F2]/30">
+              <CardTitle className="text-2xl font-script text-[#5D0E11] lowercase">General Configuration</CardTitle>
+              <CardDescription className="text-[#5D0E11]/60 font-bold">Configure how the booth behaves during the event.</CardDescription>
             </CardHeader>
             <CardContent className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Countdown Timer (sec)</label>
-                  <input type="number" defaultValue={3} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-slate-900" />
+                  <label className="text-sm font-black text-[#5D0E11] ml-1 uppercase tracking-widest">Countdown Timer (sec)</label>
+                  <input type="number" defaultValue={3} className="w-full px-4 py-3 bg-[#FDF2F2]/30 border-2 border-[#5D0E11] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#5D0E11]/10 transition-all text-[#5D0E11] font-bold" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Flash Intensity</label>
-                  <select className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all appearance-none text-slate-900">
+                  <label className="text-sm font-black text-[#5D0E11] ml-1 uppercase tracking-widest">Flash Intensity</label>
+                  <select className="w-full px-4 py-3 bg-[#FDF2F2]/30 border-2 border-[#5D0E11] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#5D0E11]/10 transition-all appearance-none text-[#5D0E11] font-bold">
                     <option>Low</option>
                     <option selected>Medium</option>
                     <option>High</option>
@@ -86,32 +86,33 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-purple-50 rounded-2xl border border-purple-100">
+              <div className="flex items-center justify-between p-6 bg-[#FDF2F2] rounded-2xl border-2 border-[#5D0E11]">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-bold text-purple-900">Auto-Upload to Gallery</p>
-                  <p className="text-xs text-purple-600">Instantly share photos to the public link.</p>
+                  <p className="text-sm font-black text-[#5D0E11] uppercase tracking-tighter">Auto-Upload to Gallery</p>
+                  <p className="text-xs text-[#5D0E11]/60 font-bold italic">Instantly share photos to the public link.</p>
                 </div>
-                <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-purple-600 cursor-pointer">
-                  <span className="inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition"></span>
+                <div className="relative inline-flex h-7 w-12 items-center rounded-full bg-[#5D0E11] cursor-pointer border-2 border-[#5D0E11]">
+                  <span className="inline-block h-5 w-5 translate-x-6 transform rounded-full bg-white transition shadow-sm"></span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-slate-200 shadow-sm overflow-hidden bg-white">
-            <CardHeader className="p-8 border-b border-slate-50">
-              <CardTitle className="text-xl font-bold text-slate-900">Design & Branding</CardTitle>
-              <CardDescription>Setup the look and feel of the final photostrip.</CardDescription>
+          <Card className="rounded-3xl border-4 border-[#5D0E11] shadow-[8px_8px_0px_0px_rgba(93,14,17,1)] overflow-hidden bg-white">
+            <CardHeader className="p-8 border-b-2 border-[#5D0E11]/10 bg-[#FDF2F2]/30">
+              <CardTitle className="text-2xl font-script text-[#5D0E11] lowercase">Design & Branding</CardTitle>
+              <CardDescription className="text-[#5D0E11]/60 font-bold">Setup the look and feel of the final photostrip.</CardDescription>
             </CardHeader>
             <CardContent className="p-8 space-y-8">
-              <div className="flex justify-center bg-slate-100 py-12 rounded-3xl border-2 border-dashed border-slate-200 relative group">
-                <div className="bg-white p-3 shadow-2xl rounded-sm w-32 flex flex-col gap-1.5 transform rotate-3 hover:rotate-0 transition-all">
-                  <div className="aspect-square bg-slate-200 rounded-sm"></div>
-                  <div className="aspect-square bg-slate-200 rounded-sm"></div>
-                  <div className="aspect-square bg-slate-200 rounded-sm"></div>
-                  <div className="h-4 bg-purple-100 rounded-sm mt-2"></div>
+              <div className="flex justify-center bg-[#FDF2F2]/50 py-12 rounded-3xl border-4 border-dashed border-[#5D0E11]/20 relative group overflow-hidden">
+                <div className="absolute inset-0 notizblok opacity-20"></div>
+                <div className="bg-white p-4 shadow-[12px_12px_0px_0px_rgba(93,14,17,1)] border-4 border-[#5D0E11] rounded-sm w-36 flex flex-col gap-2 transform rotate-3 hover:rotate-0 transition-all relative z-10">
+                  <div className="aspect-square bg-[#FDF2F2] rounded-sm border-2 border-[#5D0E11]/10"></div>
+                  <div className="aspect-square bg-[#FDF2F2] rounded-sm border-2 border-[#5D0E11]/10"></div>
+                  <div className="aspect-square bg-[#FDF2F2] rounded-sm border-2 border-[#5D0E11]/10"></div>
+                  <div className="h-4 bg-[#5D0E11] rounded-sm mt-2"></div>
                 </div>
-                <span className="absolute top-4 right-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Preview</span>
+                <span className="absolute top-4 right-4 text-[10px] font-black text-[#5D0E11]/40 uppercase tracking-widest z-10">Live Preview</span>
               </div>
             </CardContent>
           </Card>
@@ -123,10 +124,10 @@ export default function SettingsPage() {
 
 function SettingsTab({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
-    <button onClick={onClick} className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl transition-all ${active ? 'bg-white text-purple-600 shadow-xl shadow-slate-200 font-bold border-l-4 border-purple-600' : 'text-slate-500 hover:bg-white/60 font-medium'}`}>
+    <button onClick={onClick} className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl transition-all border-4 ${active ? 'bg-[#5D0E11] text-white border-[#5D0E11] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] font-black' : 'text-[#5D0E11]/40 border-transparent hover:bg-white/60 font-bold'}`}>
       <div className="flex items-center gap-3">
         {icon}
-        <span>{label}</span>
+        <span className="uppercase text-xs tracking-widest">{label}</span>
       </div>
       <ChevronRight size={16} className={`${active ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
     </button>
