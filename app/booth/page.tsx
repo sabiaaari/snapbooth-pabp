@@ -115,6 +115,10 @@ function BoothContent() {
   const [delay, setDelay] = useState(3);
   const [isMirror, setIsMirror] = useState(true);
   const [isFlash, setIsFlash] = useState(false);
+  const [isSessionActive, setIsSessionActive] = useState(false);
+
+  // Refs to handle timers and avoid stale closures
+  const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update template if URL changes
   useEffect(() => {
@@ -168,6 +172,7 @@ function BoothContent() {
 
     return () => {
       stopCamera();
+      if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
     };
   }, [inputMode]);
 
@@ -178,61 +183,62 @@ function BoothContent() {
     }
   };
 
-  // COUNTDOWN LOGIC
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+  // AUTOMATED SESSION LOGIC
+  const startPhotoSession = () => {
+    if (isSessionActive) return;
+    setCapturedPhotos([]);
+    setIsSessionActive(true);
+    runSequence(0);
+  };
 
-    if (isActive && timeLeft !== null && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
-      }, 1000);
-    } else if (isActive && timeLeft === 0) {
-      setIsActive(false);
-      setTimeLeft(null);
-      capturePhoto();
+  const runSequence = (index: number) => {
+    if (index >= selectedTemplate.requiredPhotos) {
+      setIsSessionActive(false);
+      return;
     }
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, timeLeft]);
+    let count = 3;
+    setTimeLeft(count);
+    setIsActive(true);
+
+    const countdownInterval = setInterval(() => {
+      count -= 1;
+      if (count > 0) {
+        setTimeLeft(count);
+      } else {
+        clearInterval(countdownInterval);
+        setTimeLeft(0);
+        setIsActive(false);
+        
+        // Capture at 0
+        capturePhoto();
+        
+        // Wait for flash/delay before next
+        sessionTimeoutRef.current = setTimeout(() => {
+          setTimeLeft(null);
+          runSequence(index + 1);
+        }, 1000);
+      }
+    }, 1000);
+  };
 
   // REDIRECT LOGIC: Watch for session completion
   useEffect(() => {
-    if (capturedPhotos.length === selectedTemplate.requiredPhotos) {
+    if (capturedPhotos.length > 0 && capturedPhotos.length === selectedTemplate.requiredPhotos) {
       localStorage.setItem('sessionPhotos', JSON.stringify(capturedPhotos));
       localStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
       
-      // Delay slightly for visual satisfaction before redirect
       const timeout = setTimeout(() => {
         router.push('/result');
-      }, 800);
+      }, 1500);
       return () => clearTimeout(timeout);
     }
   }, [capturedPhotos, selectedTemplate, router]);
 
-  // CAPTURE TRIGGER: Starts timer or captures immediately
-  const handleStartTimer = (seconds: number) => {
-    if (isActive || capturedPhotos.length >= selectedTemplate.requiredPhotos) return;
-    
-    setDelay(seconds);
-    if (seconds > 0) {
-      setTimeLeft(seconds);
-      setIsActive(true);
-    } else {
-      capturePhoto();
-    }
-  };
-
-  const handleCaptureTrigger = () => {
-    handleStartTimer(delay);
-  };
-
-  // CAPTURE LOGIC: Raw Video Capture (No Frame Overlay here)
+  // CAPTURE LOGIC: Raw Video Capture
   const capturePhoto = async () => {
     const video = videoRef.current;
     if (!video || video.readyState < 2) return;
-    if (capturedPhotos.length >= selectedTemplate.requiredPhotos) return;
 
     // Trigger Visual Flash
     setIsFlash(true);
@@ -263,11 +269,35 @@ function BoothContent() {
 
   const handleReset = () => {
     setCapturedPhotos([]);
+    setIsSessionActive(false);
+    if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
+    setTimeLeft(null);
+    setIsActive(false);
   };
 
   const handleSelectTemplate = (template: FrameTemplate) => {
+    if (isSessionActive) return;
     setSelectedTemplate(template);
     setCapturedPhotos([]); 
+  };
+
+  const handleMainUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Hitung berapa sisa slot kosong
+    const slotsAvailable = selectedTemplate.requiredPhotos - capturedPhotos.length;
+    if (slotsAvailable <= 0) return;
+    
+    // Ambil file sebanyak sisa slot kosong
+    const filesToAdd = files.slice(0, slotsAvailable);
+    
+    // Konversi ke URL dan gabungkan dengan foto yang sudah ada di state
+    const newPhotoUrls = filesToAdd.map(file => URL.createObjectURL(file));
+    setCapturedPhotos(prevPhotos => [...prevPhotos, ...newPhotoUrls]);
+    
+    // Reset input agar bisa upload file yang sama lagi
+    e.target.value = '';
   };
 
   return (
@@ -278,10 +308,10 @@ function BoothContent() {
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         
         {/* A. SECONDARY HEADER */}
-        <header className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-4 rounded-3xl border-4 border-y2k-primary shadow-[8px_8px_0_0_#2F020C]">
+        <header className={`flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-4 rounded-3xl border-4 border-y2k-primary shadow-[8px_8px_0_0_#2F020C] transition-all ${isSessionActive ? 'opacity-50 pointer-events-none grayscale scale-[0.98]' : ''}`}>
           <div className="flex items-center gap-4">
             <Link href="/templates">
-              <Button variant="outline" className="rounded-full border-2 border-y2k-primary text-y2k-primary font-black px-6 h-12 flex gap-2 hover:bg-y2k-card">
+              <Button variant="outline" disabled={isSessionActive} className="rounded-full border-2 border-y2k-primary text-y2k-primary font-black px-6 h-12 flex gap-2 hover:bg-y2k-card">
                 <ChevronLeft size={18} strokeWidth={3} />
                 Kembali
               </Button>
@@ -291,6 +321,7 @@ function BoothContent() {
           <div className="bg-y2k-bg p-1.5 rounded-full flex items-center gap-1 border-2 border-y2k-primary">
             <button 
               onClick={() => setInputMode('camera')}
+              disabled={isSessionActive}
               className={`flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all ${inputMode === 'camera' ? 'bg-y2k-primary text-white' : 'text-y2k-primary/40 hover:text-y2k-primary'}`}
             >
               <CameraIcon size={18} />
@@ -298,6 +329,7 @@ function BoothContent() {
             </button>
             <button 
               onClick={() => setInputMode('upload')}
+              disabled={isSessionActive}
               className={`flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all ${inputMode === 'upload' ? 'bg-y2k-primary text-white' : 'text-y2k-primary/40 hover:text-y2k-primary'}`}
             >
               <UploadIcon size={18} />
@@ -325,7 +357,7 @@ function BoothContent() {
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          <aside className="w-full lg:w-[280px] space-y-6 lg:sticky lg:top-36">
+          <aside className={`w-full lg:w-[280px] space-y-6 lg:sticky lg:top-36 transition-all ${isSessionActive ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
             <div className="notizblok p-8 rounded-3xl border-4 border-y2k-primary shadow-[8px_8px_0_0_#2F020C] space-y-8">
               <div className="flex items-center gap-3 border-b-2 border-y2k-primary/10 pb-4">
                 <div className="bg-y2k-bg p-2 rounded-xl text-y2k-primary border-2 border-y2k-primary">
@@ -342,7 +374,8 @@ function BoothContent() {
                   {[3, 5, 10].map((s) => (
                     <button 
                       key={s}
-                      onClick={() => handleStartTimer(s)}
+                      disabled={isSessionActive}
+                      onClick={() => setDelay(s)}
                       className={`py-2.5 rounded-2xl text-xs font-black transition-all border-2 ${delay === s ? 'bg-y2k-primary border-y2k-primary text-white' : 'bg-white border-y2k-primary text-y2k-primary hover:bg-y2k-bg'}`}
                     >
                       {s}s
@@ -356,6 +389,7 @@ function BoothContent() {
                   <FlipHorizontal size={14} /> Mirror Mode
                 </label>
                 <button 
+                  disabled={isSessionActive}
                   onClick={() => setIsMirror(!isMirror)}
                   className={`w-12 h-6 rounded-full transition-all relative border-2 border-y2k-primary ${isMirror ? 'bg-y2k-primary' : 'bg-white'}`}
                 >
@@ -368,7 +402,7 @@ function BoothContent() {
                   <Monitor size={14} /> Camera Source
                 </label>
                 <div className="space-y-2">
-                  <button className="w-full py-3 px-4 rounded-2xl bg-y2k-primary text-white text-xs font-black flex items-center justify-between border-2 border-y2k-primary">
+                  <button disabled={isSessionActive} className="w-full py-3 px-4 rounded-2xl bg-y2k-primary text-white text-xs font-black flex items-center justify-between border-2 border-y2k-primary">
                     <div className="flex items-center gap-3">
                       <Monitor size={16} />
                       <span>FaceTime HD</span>
@@ -393,44 +427,69 @@ function BoothContent() {
                   />
 
                   {/* COUNTDOWN OVERLAY */}
-                  {isActive && timeLeft !== null && (
+                  {timeLeft !== null && timeLeft > 0 && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
                       <div 
                         key={timeLeft}
-                        className="text-[180px] font-black text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] animate-in zoom-in fade-in duration-300"
+                        className="text-[180px] font-heading font-black text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] animate-in zoom-in fade-in duration-300"
                       >
                         {timeLeft}
                       </div>
                     </div>
                   )}
 
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
-                    <button 
-                      onClick={handleCaptureTrigger}
-                      disabled={isActive}
-                      className="w-20 h-20 bg-white rounded-full p-1.5 border-4 border-y2k-primary shadow-xl transition-all hover:scale-110 active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <div className="w-full h-full rounded-full flex items-center justify-center bg-y2k-primary transition-colors group-hover:bg-y2k-accent">
-                        <CameraIcon size={28} className="text-white" fill="currentColor" />
-                      </div>
-                    </button>
-                  </div>
+                  {!isSessionActive && (
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
+                      <button 
+                        onClick={startPhotoSession}
+                        className="w-24 h-24 bg-white rounded-full p-1.5 border-4 border-y2k-primary shadow-xl transition-all hover:scale-110 active:scale-95 group"
+                      >
+                        <div className="w-full h-full rounded-full flex flex-col items-center justify-center bg-y2k-primary transition-colors group-hover:bg-y2k-accent">
+                          <CameraIcon size={24} className="text-white" fill="currentColor" />
+                        </div>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="relative w-full max-w-[500px] aspect-[3/4] max-h-[70vh] bg-y2k-bg border-4 border-dashed border-y2k-primary rounded-3xl flex flex-col items-center justify-center p-8 transition-all hover:bg-white cursor-pointer group">
-                  <div className="bg-white p-6 rounded-2xl border-4 border-y2k-primary mb-6 text-y2k-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                    <FolderPlus size={48} strokeWidth={2.5} />
-                  </div>
-                  <h4 className="text-xl font-serif font-black text-y2k-primary text-center uppercase tracking-tighter">Klik atau Drag & Drop foto</h4>
-                  <div className="mt-8 px-8 py-3 bg-y2k-primary text-white rounded-full text-xs font-black tracking-widest uppercase border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all hover:scale-105 active:scale-95">
-                    Pilih File Lokal
-                  </div>
+                <div className="relative w-full max-w-[500px] aspect-[3/4] max-h-[70vh] w-full">
+                  <input 
+                    type="file" 
+                    id="booth-main-upload" 
+                    accept="image/*" 
+                    multiple
+                    className="hidden" 
+                    onChange={handleMainUploadChange} 
+                  />
+                  <label 
+                    htmlFor="booth-main-upload"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const droppedFiles = Array.from(e.dataTransfer.files);
+                      if (droppedFiles.length > 0) {
+                        const slotsAvailable = selectedTemplate.requiredPhotos - capturedPhotos.length;
+                        const filesToAdd = droppedFiles.filter(f => f.type.startsWith('image/')).slice(0, slotsAvailable);
+                        const urls = filesToAdd.map(f => URL.createObjectURL(f));
+                        setCapturedPhotos(prev => [...prev, ...urls]);
+                      }
+                    }}
+                    className="relative w-full h-full bg-y2k-bg border-4 border-dashed border-y2k-primary rounded-3xl flex flex-col items-center justify-center p-8 transition-all hover:bg-white cursor-pointer group"
+                  >
+                    <div className="bg-white p-6 rounded-2xl border-4 border-y2k-primary mb-6 text-y2k-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <FolderPlus size={48} strokeWidth={2.5} />
+                    </div>
+                    <h4 className="text-xl font-serif font-black text-y2k-primary text-center uppercase tracking-tighter">Klik atau Drag & Drop foto</h4>
+                    <div className="mt-8 px-8 py-3 bg-y2k-primary text-white rounded-full text-xs font-black tracking-widest uppercase border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all hover:scale-105 active:scale-95">
+                      Pilih File Lokal
+                    </div>
+                  </label>
                 </div>
               )}
             </div>
           </main>
 
-          <aside className="w-full lg:w-[320px] lg:sticky lg:top-36">
+          <aside className={`w-full lg:w-[320px] lg:sticky lg:top-36 transition-all ${isSessionActive ? 'scale-[0.95]' : ''}`}>
             <div className="notizblok p-8 rounded-3xl border-4 border-y2k-primary shadow-[8px_8px_0_0_#2F020C] space-y-8">
               <div className="flex justify-between items-center border-b-2 border-y2k-primary/10 pb-4">
                 <div className="flex items-center gap-3">
@@ -461,7 +520,8 @@ function BoothContent() {
 
               <div className="space-y-3 pt-4">
                 <Button 
-                  disabled={capturedPhotos.length < selectedTemplate.requiredPhotos}
+                  disabled={capturedPhotos.length < selectedTemplate.requiredPhotos || isSessionActive}
+                  onClick={() => router.push('/result')}
                   className="w-full h-16 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow gap-3 transition-all active:scale-95 disabled:opacity-50 uppercase shadow-[4px_4px_0_0_#2F020C]"
                 >
                   Selesaikan Sesi
@@ -469,6 +529,7 @@ function BoothContent() {
                 </Button>
                 <Button 
                   variant="ghost" 
+                  disabled={isSessionActive}
                   onClick={handleReset}
                   className="w-full h-12 rounded-full text-y2k-primary/40 hover:text-red-500 font-bold flex gap-2"
                 >

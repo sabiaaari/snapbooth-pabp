@@ -10,8 +10,6 @@ export default function TemplatesPage() {
   const router = useRouter();
   
   const systemTemplates = [
-    { id: 'kawaii-01', name: "Kawaii 6-Grid", color: "bg-red-100", requiredPhotos: 6 },
-    { id: 'ufo-01', name: "ALIEN UFO", color: "bg-lime-100", requiredPhotos: 6, imageUrl: '/frame-ufo.png' },
     { id: 'blue-classic', name: "BLUE CLASSIC", color: "bg-blue-100", requiredPhotos: 4, imageUrl: '/frame-biru.png' },
     { id: 'maroon-retro', name: "MAROON RETRO", color: "bg-red-50", requiredPhotos: 3, imageUrl: '/frame-merah.png' },
   ];
@@ -21,7 +19,7 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-20 py-10 font-serif text-y2k-primary">
+    <div className="max-w-5xl mx-auto w-full px-8 md:px-12 lg:px-16 space-y-20 py-10 font-serif text-y2k-primary">
       <header className="text-center space-y-6 max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-2 px-6 py-2 bg-white text-y2k-primary rounded-full text-xs font-black uppercase tracking-[0.2em] mb-4 border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <Sparkles size={14} />
@@ -35,7 +33,7 @@ export default function TemplatesPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {systemTemplates.map((template) => (
           <div key={template.id} className="group relative">
             <div className="aspect-[3/4] border-4 border-y2k-primary rounded-3xl bg-white shadow-[12px_12px_0_0_#2F020C] overflow-hidden flex flex-col transition-all duration-500 group-hover:-translate-y-4 group-hover:rotate-1">

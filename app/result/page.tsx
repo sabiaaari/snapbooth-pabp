@@ -11,6 +11,8 @@ export default function ResultPage() {
   const [template, setTemplate] = useState<FrameTemplate | null>(null);
   const [filter, setFilter] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [dragActiveIndex, setDragActiveIndex] = useState<number | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,15 +22,163 @@ export default function ResultPage() {
     
     if (savedPhotos) setPhotos(JSON.parse(savedPhotos));
     if (savedTemplate) setTemplate(JSON.parse(savedTemplate));
+
+    return () => {
+      // Cleanup blob URLs on unmount
+      photos.forEach(url => {
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+      });
+    };
   }, []);
 
-  const handleDownload = () => {
-    if (photos.length === 0) return;
-    // Basic download for now - in a real app we'd use html2canvas or merge on canvas
-    const link = document.createElement('a');
-    link.href = photos[0]; 
-    link.download = `SnapBooth-Result-${Date.now()}.png`;
-    link.click();
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragActiveIndex(index);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActiveIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragActiveIndex(null);
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setPhotos(prev => {
+        const newPhotos = [...prev];
+        // Ensure array is long enough for the slot index
+        while (newPhotos.length <= index) newPhotos.push('');
+        
+        // Revoke old blob URL if it exists at this index
+        if (newPhotos[index]?.startsWith('blob:')) {
+          URL.revokeObjectURL(newPhotos[index]);
+        }
+        
+        newPhotos[index] = url;
+        return newPhotos;
+      });
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setPhotos(prev => {
+        const newPhotos = [...prev];
+        while (newPhotos.length <= index) newPhotos.push('');
+        
+        if (newPhotos[index]?.startsWith('blob:')) {
+          URL.revokeObjectURL(newPhotos[index]);
+        }
+        
+        newPhotos[index] = url;
+        return newPhotos;
+      });
+      // Reset input value to allow selecting the same file again
+      e.target.value = '';
+    }
+  };
+
+  const handleDownload = async () => {
+    if (photos.length === 0 || !template || !template.imageUrl) return;
+    
+    setIsDownloading(true);
+
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not get canvas context');
+
+      // 1. Load Frame Image to get dimensions
+      const frameImg = new Image();
+      frameImg.crossOrigin = 'anonymous';
+      
+      await new Promise((resolve, reject) => {
+        frameImg.onload = resolve;
+        frameImg.onerror = reject;
+        frameImg.src = template.imageUrl;
+      });
+
+      // Set canvas size to match frame natural dimensions
+      canvas.width = frameImg.naturalWidth;
+      canvas.height = frameImg.naturalHeight;
+
+      // 2. Draw Photos (Bottom Layer)
+      const parsePercent = (val: string) => parseFloat(val) / 100;
+
+      // Apply Filter to photos
+      let canvasFilter = 'none';
+      if (filter === 'grayscale') canvasFilter = 'grayscale(100%)';
+      else if (filter === 'sepia contrast-125') canvasFilter = 'sepia(100%) contrast(125%)';
+      else if (filter === 'saturate-150 contrast-110') canvasFilter = 'saturate(150%) contrast(110%)';
+
+      // Load and draw each photo
+      for (let i = 0; i < template.slots.length; i++) {
+        const slot = template.slots[i];
+        const photoSrc = photos[i];
+        if (!photoSrc) continue;
+
+        const photoImg = new Image();
+        photoImg.crossOrigin = 'anonymous';
+        
+        await new Promise((resolve, reject) => {
+          photoImg.onload = resolve;
+          photoImg.onerror = reject;
+          photoImg.src = photoSrc;
+        });
+
+        const x = parsePercent(slot.left) * canvas.width;
+        const y = parsePercent(slot.top) * canvas.height;
+        const w = parsePercent(slot.width) * canvas.width;
+        const h = parsePercent(slot.height) * canvas.height;
+
+        ctx.save();
+        ctx.filter = canvasFilter;
+        
+        // Draw image with "object-fit: cover" logic for canvas
+        const imgRatio = photoImg.width / photoImg.height;
+        const slotRatio = w / h;
+        let drawW, drawH, drawX, drawY;
+
+        if (imgRatio > slotRatio) {
+          drawH = photoImg.height;
+          drawW = photoImg.height * slotRatio;
+          drawX = (photoImg.width - drawW) / 2;
+          drawY = 0;
+        } else {
+          drawW = photoImg.width;
+          drawH = photoImg.width / slotRatio;
+          drawX = 0;
+          drawY = (photoImg.height - drawH) / 2;
+        }
+
+        ctx.drawImage(photoImg, drawX, drawY, drawW, drawH, x, y, w, h);
+        ctx.restore();
+      }
+
+      // 3. Draw Frame (Top Layer)
+      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+      // 4. Export and Download
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `snapbooth-${template.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Gagal mengunduh foto. Silakan coba lagi.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const filters = [
@@ -78,7 +228,7 @@ export default function ResultPage() {
             <span>Masterpiece Ready</span>
         </div>
         <h1 className="text-5xl md:text-7xl font-heading font-black lowercase leading-none text-y2k-primary">
-            Hasil <span className="underline decoration-8">Komposisi</span>
+            Hasil <span className="underline decoration-8">Jepretanmu</span>
         </h1>
       </div>
 
@@ -99,11 +249,18 @@ export default function ResultPage() {
                         {template && template.slots && template.slots.length > 0 ? (
                             template.slots.map((slot, index) => {
                                 const photo = photos[index];
-                                if (!photo) return null;
+                                const isDragging = dragActiveIndex === index;
+                                
                                 return (
                                     <div 
                                         key={index} 
-                                        className={`absolute overflow-hidden bg-slate-100 transition-all duration-700 ${filter}`}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        className={`absolute overflow-hidden transition-all duration-300 flex items-center justify-center
+                                            ${photo ? filter : 'bg-slate-200'} 
+                                            ${isDragging ? 'bg-y2k-card ring-4 ring-dashed ring-y2k-primary z-30 scale-95 opacity-80' : 'z-10'}
+                                        `}
                                         style={{ 
                                             top: slot.top, 
                                             left: slot.left, 
@@ -111,7 +268,40 @@ export default function ResultPage() {
                                             height: slot.height 
                                         }}
                                     >
-                                        <img src={photo} className="absolute inset-0 w-full h-full object-cover" alt={`Slot ${index}`} />
+                                        <input 
+                                          type="file" 
+                                          id={`file-upload-${index}`} 
+                                          accept="image/*" 
+                                          className="hidden" 
+                                          onChange={(e) => handleFileInputChange(e, index)} 
+                                        />
+                                        
+                                        {photo ? (
+                                            <label htmlFor={`file-upload-${index}`} className="absolute inset-0 w-full h-full cursor-pointer">
+                                              <img src={photo} className="w-full h-full object-cover" alt={`Slot ${index}`} />
+                                            </label>
+                                        ) : (
+                                            <label 
+                                              htmlFor={`file-upload-${index}`}
+                                              className="flex flex-col items-center gap-2 cursor-pointer w-full h-full justify-center"
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-white border-2 border-y2k-primary flex items-center justify-center text-y2k-primary shadow-[2px_2px_0_0_#2F020C]">
+                                                    <ImageIcon size={20} />
+                                                </div>
+                                                <div className="px-3 py-1 bg-y2k-primary text-white text-[8px] font-black rounded-full uppercase tracking-tighter shadow-[2px_2px_0_0_#2F020C]">
+                                                    Pilih File Lokal
+                                                </div>
+                                            </label>
+                                        )}
+                                        
+                                        {/* Drag Indicator Overlay */}
+                                        {isDragging && (
+                                            <div className="absolute inset-0 bg-y2k-primary/20 flex items-center justify-center pointer-events-none">
+                                                <div className="bg-white p-3 rounded-full shadow-xl animate-bounce">
+                                                    <Check className="text-y2k-primary" size={24} strokeWidth={4} />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })
@@ -178,10 +368,15 @@ export default function ResultPage() {
             <div className="space-y-4">
                 <Button 
                   onClick={handleDownload}
-                  className="w-full h-20 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white text-2xl font-serif font-black shadow-[8px_8px_0_0_#2F020C] transition-all hover:scale-105 active:scale-95 flex gap-4 border-2 border-y2k-shadow"
+                  disabled={isDownloading}
+                  className="w-full h-20 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white text-2xl font-serif font-black shadow-[8px_8px_0_0_#2F020C] transition-all hover:scale-105 active:scale-95 flex gap-4 border-2 border-y2k-shadow disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    <Download size={28} strokeWidth={3} />
-                    UNDUH HASIL
+                    {isDownloading ? (
+                      <RefreshCw size={28} strokeWidth={3} className="animate-spin" />
+                    ) : (
+                      <Download size={28} strokeWidth={3} />
+                    )}
+                    {isDownloading ? 'MEMPROSES...' : 'UNDUH HASIL'}
                 </Button>
 
                 <div className="grid grid-cols-2 gap-4">
