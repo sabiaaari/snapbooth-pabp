@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export type FrameSlot = {
   top: string;
@@ -113,25 +114,56 @@ function BoothContent() {
   // Refs to handle timers and avoid stale closures
   const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Update template if URL changes
+  // Fetch custom template if not found in system templates
+  useEffect(() => {
+    const fetchCustomTemplate = async () => {
+      if (!templateIdParam || frames.find(f => f.id === templateIdParam)) return;
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        let query = supabase.from('templates').select('*');
+        
+        if (user) {
+          query = query.or(`user_id.eq.${user.id},is_system.eq.true`);
+        } else {
+          query = query.eq('is_system', true);
+        }
+
+        const { data, error } = await query
+          .eq('id', templateIdParam)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setSelectedTemplate({
+            id: data.id,
+            name: data.name,
+            imageUrl: data.image_url,
+            requiredPhotos: data.required_photos,
+            thumbColor: 'bg-y2k-bg',
+            slots: data.slots || default4Slots
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching template:", err);
+      }
+    };
+
+    fetchCustomTemplate();
+  }, [templateIdParam]);
+
+  // Update template if URL changes (for system templates)
   useEffect(() => {
     if (templateIdParam) {
       const found = frames.find(f => f.id === templateIdParam);
       if (found) {
         setSelectedTemplate(found);
-      } else {
-        setSelectedTemplate({
-          id: templateIdParam,
-          name: templateIdParam.replace(/-/g, ' '),
-          imageUrl: '',
-          requiredPhotos: slotsParam ? parseInt(slotsParam) : 4,
-          thumbColor: 'bg-y2k-bg',
-          slots: []
-        });
       }
       setCapturedPhotos([]);
     }
-  }, [templateIdParam, slotsParam]);
+  }, [templateIdParam]);
 
   // TIMER STATE
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -218,11 +250,11 @@ function BoothContent() {
   // REDIRECT LOGIC: Watch for session completion
   useEffect(() => {
     if (capturedPhotos.length > 0 && capturedPhotos.length === selectedTemplate.requiredPhotos) {
-      localStorage.setItem('sessionPhotos', JSON.stringify(capturedPhotos));
-      localStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
+      sessionStorage.setItem('currentSessionPhotos', JSON.stringify(capturedPhotos));
+      sessionStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
       
       const timeout = setTimeout(() => {
-        router.push('/result');
+        router.push(`/result?templateId=${selectedTemplate.id}`);
       }, 1500);
       return () => clearTimeout(timeout);
     }
@@ -274,7 +306,7 @@ function BoothContent() {
     setCapturedPhotos([]); 
   };
 
-  const handleMainUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainUploadChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -285,12 +317,40 @@ function BoothContent() {
     // Ambil file sebanyak sisa slot kosong
     const filesToAdd = files.slice(0, slotsAvailable);
     
-    // Konversi ke URL dan gabungkan dengan foto yang sudah ada di state
-    const newPhotoUrls = filesToAdd.map(file => URL.createObjectURL(file));
-    setCapturedPhotos(prevPhotos => [...prevPhotos, ...newPhotoUrls]);
+    // Konversi ke Base64 dan gabungkan dengan foto yang sudah ada di state
+    const base64Photos = await Promise.all(
+      filesToAdd.map(file => new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      }))
+    );
+
+    setCapturedPhotos(prevPhotos => [...prevPhotos, ...base64Photos]);
     
     // Reset input agar bisa upload file yang sama lagi
     e.target.value = '';
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length === 0) return;
+
+    const slotsAvailable = selectedTemplate.requiredPhotos - capturedPhotos.length;
+    if (slotsAvailable <= 0) return;
+
+    const filesToAdd = droppedFiles.filter(f => f.type.startsWith('image/')).slice(0, slotsAvailable);
+    
+    const base64Photos = await Promise.all(
+      filesToAdd.map(file => new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      }))
+    );
+
+    setCapturedPhotos(prev => [...prev, ...base64Photos]);
   };
 
   return (
@@ -440,16 +500,7 @@ function BoothContent() {
                   <label 
                     htmlFor="booth-main-upload"
                     onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const droppedFiles = Array.from(e.dataTransfer.files);
-                      if (droppedFiles.length > 0) {
-                        const slotsAvailable = selectedTemplate.requiredPhotos - capturedPhotos.length;
-                        const filesToAdd = droppedFiles.filter(f => f.type.startsWith('image/')).slice(0, slotsAvailable);
-                        const urls = filesToAdd.map(f => URL.createObjectURL(f));
-                        setCapturedPhotos(prev => [...prev, ...urls]);
-                      }
-                    }}
+                    onDrop={handleDrop}
                     className="relative w-full h-full bg-y2k-bg border-4 border-dashed border-y2k-primary rounded-3xl flex flex-col items-center justify-center p-8 transition-all hover:bg-white cursor-pointer group"
                   >
                     <div className="bg-white p-6 rounded-2xl border-4 border-y2k-primary mb-6 text-y2k-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">

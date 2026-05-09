@@ -5,33 +5,34 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const router = useRouter();
 
-  const handleMagicLinkLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !password) return;
     
     setIsLoading(true);
     setMessage(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/templates`,
-        }
+        password,
       });
 
       if (error) throw error;
       
-      setMessage({ type: 'success', text: 'Magic link sent! Check your inbox.' });
+      router.push('/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to send magic link.' });
+      setMessage({ type: 'error', text: error.message || 'Invalid email or password.' });
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +44,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/templates`,
+          redirectTo: `${window.location.origin}/dashboard`,
         },
       });
       if (error) throw error;
@@ -57,7 +58,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-y2k-bg flex items-center justify-center p-4 font-serif text-y2k-primary">
       {/* Back Button - Outside Card */}
-      <div className="fixed top-8 left-8">
+      <div className="fixed top-28 left-8">
         <Link href="/" className="inline-flex items-center gap-2 text-y2k-primary/60 hover:text-y2k-primary font-black transition-colors bg-white px-4 py-2 rounded-full border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <ChevronLeft size={20} strokeWidth={3} />
           BACK
@@ -82,7 +83,7 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-6 relative z-10">
-          <form onSubmit={handleMagicLinkLogin} className="space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest ml-2">Email Address</label>
               <input 
@@ -94,13 +95,25 @@ export default function LoginPage() {
                 className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
               />
             </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest ml-2">Password</label>
+              <input 
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
+              />
+            </div>
             
             <Button 
               type="submit"
               disabled={isLoading}
               className="w-full h-16 rounded-2xl bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all active:scale-95 disabled:opacity-50"
             >
-              {isLoading ? 'SENDING...' : 'SEND'}
+              {isLoading ? 'LOGGING IN...' : 'LOGIN'}
             </Button>
           </form>
 

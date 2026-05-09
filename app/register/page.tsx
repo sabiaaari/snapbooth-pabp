@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, Sparkles, User, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -12,13 +13,14 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const router = useRouter();
 
   const validatePassword = (pass: string) => {
     const minLength = pass.length >= 8;
     const hasUpper = /[A-Z]/.test(pass);
     const hasLower = /[a-z]/.test(pass);
     const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-    
+
     return {
       isValid: minLength && hasUpper && hasLower && hasSymbol,
       requirements: { minLength, hasUpper, hasLower, hasSymbol }
@@ -31,9 +33,9 @@ export default function RegisterPage() {
 
     const { isValid } = validatePassword(password);
     if (!isValid) {
-      setMessage({ 
-        type: 'error', 
-        text: 'Password is too weak! Please follow all requirements below.' 
+      setMessage({
+        type: 'error',
+        text: 'Password is too weak! Please follow all requirements below.'
       });
       return;
     }
@@ -42,18 +44,34 @@ export default function RegisterPage() {
     setMessage(null);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             username: username,
           },
-          emailRedirectTo: `${window.location.origin}/templates`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         }
       });
 
       if (error) throw error;
+      if (data.user) {
+
+        const { error: profileError } =
+          await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              username: username,
+              email: email,
+              provider: 'email',
+            });
+
+        if (profileError) {
+          throw profileError;
+        }
+      }
 
       setMessage({ type: 'success', text: 'Registration successful! Please check your email for verification.' });
     } catch (error: any) {
@@ -70,7 +88,7 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/templates`,
+          redirectTo: `${window.location.origin}/dashboard`,
         },
       });
       if (error) throw error;
@@ -84,7 +102,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-y2k-bg flex items-center justify-center p-4 font-serif text-y2k-primary py-20">
       {/* Back Button - Outside Card */}
-      <div className="fixed top-8 left-8 z-50">
+      <div className="fixed top-28 left-8 z-50">
         <Link href="/" className="inline-flex items-center gap-2 text-y2k-primary/60 hover:text-y2k-primary font-black transition-colors bg-white px-4 py-2 rounded-full border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <ChevronLeft size={20} strokeWidth={3} />
           BACK
@@ -114,7 +132,7 @@ export default function RegisterPage() {
               <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
                 <User size={12} /> Username
               </label>
-              <input 
+              <input
                 type="text"
                 required
                 placeholder="snaplover2026"
@@ -128,7 +146,7 @@ export default function RegisterPage() {
               <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
                 <Mail size={12} /> Email Address
               </label>
-              <input 
+              <input
                 type="email"
                 required
                 placeholder="you@example.com"
@@ -142,7 +160,7 @@ export default function RegisterPage() {
               <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
                 <Lock size={12} /> Password
               </label>
-              <input 
+              <input
                 type="password"
                 required
                 placeholder="••••••••"
@@ -150,7 +168,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
               />
-              
+
               {/* Password Requirements Checklist */}
               <div className="grid grid-cols-2 gap-2 px-2 pt-1">
                 {[
@@ -168,8 +186,8 @@ export default function RegisterPage() {
                 ))}
               </div>
             </div>
-            
-            <Button 
+
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full h-16 rounded-2xl bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all active:scale-95 disabled:opacity-50"
@@ -191,7 +209,7 @@ export default function RegisterPage() {
             <span className="relative px-4 bg-white text-[10px] font-black uppercase tracking-widest text-y2k-primary/40">OR</span>
           </div>
 
-          <Button 
+          <Button
             onClick={handleGoogleLogin}
             disabled={isLoading}
             className="w-full h-16 rounded-2xl border-2 border-y2k-primary bg-white text-y2k-primary hover:bg-y2k-card font-black text-sm flex items-center justify-center gap-4 transition-all active:scale-95 shadow-[4px_4px_0_0_#2F020C] disabled:opacity-50"
