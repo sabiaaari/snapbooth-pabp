@@ -17,14 +17,14 @@ export default function LandingPage() {
 
         {/* Hero Title */}
         <h2 className="text-7xl md:text-7xl font-heading font-black lowercase leading-[0.85] text-y2k-primary">
-          Abadikan <br />
-          Momenmu dengan <br />
+          capture <br />
+          your moments with <br />
           <span className="underline decoration-12">SnapBooth</span>
         </h2>
 
         {/* Subtitle */}
         <p className="text-xl md:text-2xl text-y2k-primary/60 font-bold leading-relaxed max-w-2xl mx-auto lowercase italic">
-          Gunakan bingkai estetik dari sistem, atau buat bingkai kustom khusus untuk dirimu sendiri.
+          use aesthetic frames from our system, or create your very own custom frame.
         </p>
 
         {/* Action Buttons */}
@@ -32,7 +32,7 @@ export default function LandingPage() {
           <Link href="/templates">
             <Button variant="outline" className="border-4 border-y2k-primary text-y2k-primary bg-white hover:bg-y2k-card px-12 h-20 rounded-full text-2xl font-black transition-all hover:scale-105 active:scale-95 flex gap-4 shadow-[8px_8px_0_0_#2F020C]">
               <LayoutGrid size={28} strokeWidth={3} />
-              Lihat Template Sistem
+              Explore System Templates
             </Button>
           </Link>
         </div>

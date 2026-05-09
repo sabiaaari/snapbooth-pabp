@@ -62,13 +62,6 @@ function BoothContent() {
   ];
 
   const frames: FrameTemplate[] = [
-    { id: 'kawaii-01', name: 'Kawaii 6-Grid', imageUrl: '/frame-kawaii.png', requiredPhotos: 6, thumbColor: 'bg-red-100', slots: default6Slots },
-    { id: 'std-04', name: 'Standard 4', imageUrl: '/frames/std4.png', requiredPhotos: 4, thumbColor: 'bg-slate-100', slots: default4Slots },
-    { id: 'party-08', name: 'Party 8', imageUrl: '/frames/party8.png', requiredPhotos: 8, thumbColor: 'bg-pink-100', slots: Array(8).fill({ top: '0', left: '0', width: '25%', height: '25%' }) },
-    { id: 'ocean-03', name: 'Ocean 3', imageUrl: '/frames/ocean3.png', requiredPhotos: 3, thumbColor: 'bg-blue-100', slots: Array(3).fill({ top: '0', left: '0', width: '33%', height: '33%' }) },
-    { id: 'min-01', name: 'Minimal 1', imageUrl: '/frames/min1.png', requiredPhotos: 1, thumbColor: 'bg-amber-100', slots: [{ top: '10%', left: '10%', width: '80%', height: '80%' }] },
-    { id: 'tech-04', name: 'Tech Noir 4', imageUrl: '/frames/tech4.png', requiredPhotos: 4, thumbColor: 'bg-slate-900', slots: default4Slots },
-    { id: 'ufo-01', name: 'ALIEN UFO', imageUrl: '/frame-ufo.png', requiredPhotos: 6, thumbColor: 'bg-lime-100', slots: default6Slots },
     { 
       id: 'blue-classic', 
       name: 'BLUE CLASSIC', 
@@ -313,7 +306,7 @@ function BoothContent() {
             <Link href="/templates">
               <Button variant="outline" disabled={isSessionActive} className="rounded-full border-2 border-y2k-primary text-y2k-primary font-black px-6 h-12 flex gap-2 hover:bg-y2k-card">
                 <ChevronLeft size={18} strokeWidth={3} />
-                Kembali
+                Back
               </Button>
             </Link>
           </div>
@@ -325,7 +318,7 @@ function BoothContent() {
               className={`flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all ${inputMode === 'camera' ? 'bg-y2k-primary text-white' : 'text-y2k-primary/40 hover:text-y2k-primary'}`}
             >
               <CameraIcon size={18} />
-              KAMERA
+              CAMERA
             </button>
             <button 
               onClick={() => setInputMode('upload')}
@@ -335,23 +328,6 @@ function BoothContent() {
               <UploadIcon size={18} />
               UPLOAD
             </button>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-8 pr-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-y2k-primary text-white flex items-center justify-center text-xs font-black border-2 border-y2k-primary">1</div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-y2k-primary">Capture</span>
-            </div>
-            <div className="w-12 h-1 bg-y2k-primary/10 rounded-full"></div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white text-y2k-primary/20 flex items-center justify-center text-xs font-black border-2 border-y2k-primary/20">2</div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-y2k-primary/20">Edit</span>
-            </div>
-            <div className="w-12 h-1 bg-y2k-primary/10 rounded-full"></div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white text-y2k-primary/20 flex items-center justify-center text-xs font-black border-2 border-y2k-primary/20">3</div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-y2k-primary/20">Download</span>
-            </div>
           </div>
         </header>
 
@@ -479,9 +455,9 @@ function BoothContent() {
                     <div className="bg-white p-6 rounded-2xl border-4 border-y2k-primary mb-6 text-y2k-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
                       <FolderPlus size={48} strokeWidth={2.5} />
                     </div>
-                    <h4 className="text-xl font-serif font-black text-y2k-primary text-center uppercase tracking-tighter">Klik atau Drag & Drop foto</h4>
+                    <h4 className="text-xl font-serif font-black text-y2k-primary text-center uppercase tracking-tighter">CLICK OR DRAG & DROP PHOTOS</h4>
                     <div className="mt-8 px-8 py-3 bg-y2k-primary text-white rounded-full text-xs font-black tracking-widest uppercase border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all hover:scale-105 active:scale-95">
-                      Pilih File Lokal
+                      CHOOSE LOCAL FILE
                     </div>
                   </label>
                 </div>
@@ -524,7 +500,7 @@ function BoothContent() {
                   onClick={() => router.push('/result')}
                   className="w-full h-16 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow gap-3 transition-all active:scale-95 disabled:opacity-50 uppercase shadow-[4px_4px_0_0_#2F020C]"
                 >
-                  Selesaikan Sesi
+                  Finish Session
                   <Check size={20} strokeWidth={3} />
                 </Button>
                 <Button 
@@ -534,7 +510,7 @@ function BoothContent() {
                   className="w-full h-12 rounded-full text-y2k-primary/40 hover:text-red-500 font-bold flex gap-2"
                 >
                   <RefreshCw size={16} />
-                  Bersihkan Sesi
+                  Clear Session
                 </Button>
               </div>
             </div>

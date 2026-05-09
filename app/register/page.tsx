@@ -2,36 +2,63 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Sparkles } from "lucide-react";
+import { ChevronLeft, Sparkles, User, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { supabase } from '@/lib/supabase';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  const handleMagicLinkLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
+  const validatePassword = (pass: string) => {
+    const minLength = pass.length >= 8;
+    const hasUpper = /[A-Z]/.test(pass);
+    const hasLower = /[a-z]/.test(pass);
+    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
     
+    return {
+      isValid: minLength && hasUpper && hasLower && hasSymbol,
+      requirements: { minLength, hasUpper, hasLower, hasSymbol }
+    };
+  };
+
+  const handleEmailRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !email || !password) return;
+
+    const { isValid } = validatePassword(password);
+    if (!isValid) {
+      setMessage({ 
+        type: 'error', 
+        text: 'Password is too weak! Please follow all requirements below.' 
+      });
+      return;
+    }
+
     setIsLoading(true);
     setMessage(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signUp({
         email,
+        password,
         options: {
+          data: {
+            username: username,
+          },
           emailRedirectTo: `${window.location.origin}/templates`,
         }
       });
 
       if (error) throw error;
-      
-      setMessage({ type: 'success', text: 'Magic link sent! Check your inbox.' });
+
+      setMessage({ type: 'success', text: 'Registration successful! Please check your email for verification.' });
     } catch (error: any) {
-      console.error('Login error:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to send magic link.' });
+      console.error('Registration error:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to register.' });
     } finally {
       setIsLoading(false);
     }
@@ -55,9 +82,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-y2k-bg flex items-center justify-center p-4 font-serif text-y2k-primary">
+    <div className="min-h-screen bg-y2k-bg flex items-center justify-center p-4 font-serif text-y2k-primary py-20">
       {/* Back Button - Outside Card */}
-      <div className="fixed top-8 left-8">
+      <div className="fixed top-8 left-8 z-50">
         <Link href="/" className="inline-flex items-center gap-2 text-y2k-primary/60 hover:text-y2k-primary font-black transition-colors bg-white px-4 py-2 rounded-full border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <ChevronLeft size={20} strokeWidth={3} />
           BACK
@@ -71,20 +98,36 @@ export default function LoginPage() {
         <div className="text-center space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1 bg-y2k-bg text-y2k-primary rounded-full text-[10px] font-black uppercase tracking-widest border-2 border-y2k-primary mb-2">
             <Sparkles size={12} />
-            <span>Studio Access</span>
+            <span>Join the Studio</span>
           </div>
-          <h1 className="text-7xl font-heading font-black text-y2k-primary lowercase leading-none">
+          <h1 className="text-6xl font-heading font-black text-y2k-primary lowercase leading-none">
             SnapBooth
           </h1>
           <p className="text-xl text-y2k-primary font-bold italic leading-tight">
-            Login to save your <br /> photostrips!
+            Create your account <br /> to start snapping!
           </p>
         </div>
 
         <div className="space-y-6 relative z-10">
-          <form onSubmit={handleMagicLinkLogin} className="space-y-4">
+          <form onSubmit={handleEmailRegister} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest ml-2">Email Address</label>
+              <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
+                <User size={12} /> Username
+              </label>
+              <input 
+                type="text"
+                required
+                placeholder="snaplover2026"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
+                <Mail size={12} /> Email Address
+              </label>
               <input 
                 type="email"
                 required
@@ -94,13 +137,44 @@ export default function LoginPage() {
                 className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
               />
             </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
+                <Lock size={12} /> Password
+              </label>
+              <input 
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
+              />
+              
+              {/* Password Requirements Checklist */}
+              <div className="grid grid-cols-2 gap-2 px-2 pt-1">
+                {[
+                  { label: '8+ Characters', met: password.length >= 8 },
+                  { label: 'Uppercase', met: /[A-Z]/.test(password) },
+                  { label: 'Lowercase', met: /[a-z]/.test(password) },
+                  { label: 'Symbol', met: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
+                ].map((req, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <div className={`w-2 h-2 rounded-full border border-y2k-primary ${req.met ? 'bg-green-400' : 'bg-white'}`}></div>
+                    <span className={`text-[9px] font-black uppercase tracking-tighter ${req.met ? 'text-y2k-primary' : 'text-y2k-primary/30'}`}>
+                      {req.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
             
             <Button 
               type="submit"
               disabled={isLoading}
               className="w-full h-16 rounded-2xl bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all active:scale-95 disabled:opacity-50"
             >
-              {isLoading ? 'SENDING...' : 'SEND'}
+              {isLoading ? 'REGISTERING...' : 'REGISTER NOW'}
             </Button>
           </form>
 
@@ -144,8 +218,8 @@ export default function LoginPage() {
           </Button>
 
           <div className="text-center">
-            <Link href="/register" className="text-[11px] font-black uppercase tracking-wider text-y2k-primary/60 hover:text-y2k-primary transition-colors underline decoration-2">
-              Don't have an account? Register here
+            <Link href="/login" className="text-[11px] font-black uppercase tracking-wider text-y2k-primary/60 hover:text-y2k-primary transition-colors underline decoration-2">
+              Already have an account? Login here
             </Link>
           </div>
         </div>

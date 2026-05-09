@@ -18,8 +18,8 @@ export type FrameTemplate = {
 
 export default function DashboardPage() {
   const [userFrames, setUserFrames] = useState<FrameTemplate[]>([
-    { id: '1', name: "Kawaii 6-Grid", imageUrl: "/frames/kawaii.png", requiredPhotos: 6, date: "Hari ini", color: "bg-pink-pastel" },
-    { id: '2', name: "Wisuda 2024", imageUrl: "/frames/grad.png", requiredPhotos: 4, date: "2 hari lalu", color: "bg-red-100" },
+    { id: '1', name: "Kawaii 6-Grid", imageUrl: "/frames/kawaii.png", requiredPhotos: 6, date: "Today", color: "bg-pink-pastel" },
+    { id: '2', name: "Graduation 2024", imageUrl: "/frames/grad.png", requiredPhotos: 4, date: "2 days ago", color: "bg-red-100" },
   ]);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -38,7 +38,7 @@ export default function DashboardPage() {
       name: newFrame.name || 'Untitled Frame',
       imageUrl: '/placeholder-frame.png',
       requiredPhotos: newFrame.requiredPhotos,
-      date: 'Baru saja',
+      date: 'Just now',
       color: 'bg-slate-100',
     };
     setUserFrames([frame, ...userFrames]);
@@ -56,12 +56,12 @@ export default function DashboardPage() {
                 <span>Private Studio</span>
             </div>
             <h2 className="text-5xl font-heading font-black text-y2k-primary lowercase leading-none">
-                Koleksi Template <br />
-                <span className="underline decoration-8">Pribadi Anda</span>
+                Your Personal <br />
+                <span className="underline decoration-8">Template Collection</span>
             </h2>
             <div className="flex items-center gap-3 text-y2k-primary/40">
                 <ShieldCheck size={20} className="text-y2k-primary" />
-                <p className="font-bold text-sm uppercase tracking-widest italic">Aset Anda aman dan hanya untuk penggunaan pribadi</p>
+                <p className="font-bold text-sm uppercase tracking-widest italic">Your assets are safe and for personal use only</p>
             </div>
         </div>
         
@@ -87,10 +87,10 @@ export default function DashboardPage() {
             <Upload size={80} strokeWidth={3} />
           </div>
           <h3 className="text-4xl font-heading font-black text-y2k-primary text-center lowercase tracking-tighter">
-            Upload Frame Custom Anda
+            Upload Your Custom Frame
           </h3>
           <p className="text-y2k-primary/40 mt-4 font-bold text-lg text-center max-w-lg leading-relaxed italic">
-            Seret desain PNG transparan Anda ke sini untuk mulai memotret dengan gaya unik Anda sendiri.
+            Drag your transparent PNG designs here to start snapping with your own unique style.
           </p>
         </div>
 
@@ -102,22 +102,22 @@ export default function DashboardPage() {
             </button>
             <div className="max-w-xl mx-auto space-y-8">
               <div className="space-y-2">
-                <h4 className="text-3xl font-heading font-black text-y2k-primary lowercase tracking-tight">Detail Frame Baru</h4>
-                <p className="text-y2k-primary/60 font-bold text-sm">Lengkapi informasi berikut sebelum menyimpan frame.</p>
+                <h4 className="text-3xl font-heading font-black text-y2k-primary lowercase tracking-tight">New Frame Details</h4>
+                <p className="text-y2k-primary/60 font-bold text-sm">Complete the information below before saving your frame.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-y2k-primary/40 ml-1">Nama Frame</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-y2k-primary/40 ml-1">Frame Name</Label>
                   <Input 
-                    placeholder="Contoh: Wedding Party" 
+                    placeholder="e.g.: Wedding Party" 
                     className="rounded-full h-14 border-2 border-y2k-primary bg-white px-6 font-bold text-y2k-primary"
                     value={newFrame.name}
                     onChange={(e) => setNewFrame({...newFrame, name: e.target.value})}
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-y2k-primary/40 ml-1">Jumlah Lubang Foto</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-y2k-primary/40 ml-1">Photo Slot Count</Label>
                   <Input 
                     type="number" 
                     min="1" 
@@ -133,7 +133,7 @@ export default function DashboardPage() {
                 onClick={handleSaveFrame}
                 className="w-full h-16 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white text-xl font-black shadow-[8px_8px_0_0_#2F020C] transition-all hover:scale-[1.02] active:scale-95 border-2 border-y2k-shadow"
               >
-                SIMPAN FRAME KE STUDIO
+                SAVE FRAME TO STUDIO
               </Button>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function DashboardPage() {
       <section className="space-y-12 pb-20">
         <div className="flex justify-between items-center px-4">
             <h3 className="text-4xl font-heading font-black text-y2k-primary lowercase tracking-tighter">
-                Koleksi <span className="underline decoration-8">Terbaru</span>
+                Latest <span className="underline decoration-8">Collection</span>
             </h3>
             <div className="bg-white border-2 border-y2k-primary px-6 py-2 rounded-full text-xs font-black text-y2k-primary uppercase tracking-[0.2em] shadow-[4px_4px_0_0_#2F020C]">
                 {userFrames.length} Frames Ready
