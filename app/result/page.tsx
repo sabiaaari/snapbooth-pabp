@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Download, RefreshCw, Layers, Share2, ArrowLeft, Sparkles, Check, Image as ImageIcon, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -29,6 +29,19 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
 };
 
 export default function ResultPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 min-h-[60vh] flex flex-col justify-center items-center gap-4 text-y2k-primary">
+        <RefreshCw className="animate-spin" size={48} />
+        <p className="font-serif font-black uppercase tracking-widest text-sm text-y2k-primary/40">Loading Masterpiece...</p>
+      </div>
+    }>
+      <ResultContent />
+    </Suspense>
+  );
+}
+
+function ResultContent() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('templateId');
   
@@ -223,8 +236,9 @@ export default function ResultPage() {
 
     try {
       // --- LANGKAH 1: MUAT SEMUA ASET SECARA SINKRON ---
-      // Muat bingkai utama untuk menentukan resolusi kanvas
       const frameImg = await loadImage(template.imageUrl);
+      
+      // Sinkronkan resolusi kanvas dengan resolusi asli frame
       canvas.width = frameImg.naturalWidth;
       canvas.height = frameImg.naturalHeight;
 
@@ -237,7 +251,7 @@ export default function ResultPage() {
         const holes = detectFrameSlots(frameImg);
         if (holes.length > 0) {
           setDetectedSlots(holes);
-          return; 
+          return; // Berhenti sementara, re-render akan memanggil fungsi ini lagi
         }
       } else {
         // Normalisasi data dari database (array vs single object)
@@ -266,11 +280,7 @@ export default function ResultPage() {
         if (!slot || !photoImg) continue;
 
         // Hitung koordinat piksel dari persentase
-        const parse = (val: any) => {
-          const num = parseFloat(String(val).replace('%', ''));
-          return isNaN(num) ? 0 : num / 100;
-        };
-
+        const parse = (val: any) => parseFloat(String(val).replace('%', '')) / 100;
         const rect = {
           x: parse(slot.left) * canvas.width,
           y: parse(slot.top) * canvas.height,
@@ -314,7 +324,6 @@ export default function ResultPage() {
         const finalSW = sw / z;
         const finalSH = sh / z;
         
-        // Konversi offset geser kanvas ke skala source image
         const offX = (transform.x / rect.w) * sw;
         const offY = (transform.y / rect.h) * sh;
 
@@ -326,7 +335,6 @@ export default function ResultPage() {
       }
 
       // --- LANGKAH 4: GAMBAR FRAME PNG (LAYER 3 - DI ATAS FOTO) ---
-      // Frame digambar terakhir agar menutupi sisa potongan foto di bawahnya
       ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
 
     } catch (err) {
