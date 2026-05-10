@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { supabase } from '@/lib/supabase';
+import { supabase, getURL } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -44,7 +44,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${getURL()}dashboard`,
         },
       });
       if (error) throw error;
