@@ -9,11 +9,24 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
+import React, { useState, useEffect } from 'react';
+import { Upload, Image as ImageIcon, Trash2, ShieldCheck, ChevronRight, Lock, X, LogOut, Sparkles, LayoutGrid, RefreshCw, Star, Zap, Camera } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
+import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+
 export type FrameTemplate = {
   id: string;
   name: string;
-  imageUrl: string;
-  requiredPhotos: number;
+  image_url: string;
+  required_photos: number;
+  is_system: boolean;
+  user_id?: string;
+  category?: string;
   created_at: string;
   color?: string;
 };
@@ -65,7 +78,6 @@ export default function DashboardPage() {
         // Check for "relation does not exist" error (code 42P01)
         if (error.code === '42P01') {
           console.warn('The "templates" table does not exist in your Supabase database. Falling back to local state.');
-          // Initialize with empty array or some default data
           setUserFrames([]);
           return;
         }
@@ -73,12 +85,7 @@ export default function DashboardPage() {
       }
       setUserFrames(data || []);
     } catch (error: any) {
-      console.error('Error fetching templates:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      });
+      console.error('Error fetching templates:', error);
     } finally {
       setIsLoading(false);
     }
@@ -98,22 +105,16 @@ export default function DashboardPage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result as string);
-      // Show the metadata form once a file is selected
       setIsUploading(true);
     };
     reader.readAsDataURL(file);
     
-    // Reset input
     e.target.value = '';
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/');
-  };
-
-  const handleSimulateUpload = () => {
-    setIsUploading(true);
   };
 
   const handleSaveFrame = async () => {
@@ -125,6 +126,7 @@ export default function DashboardPage() {
         name: newFrame.name || 'Untitled Frame',
         image_url: previewUrl || '/placeholder-frame.png',
         required_photos: newFrame.requiredPhotos,
+        is_system: false,
         created_at: new Date().toISOString(),
       };
 
@@ -135,14 +137,14 @@ export default function DashboardPage() {
 
       if (error) {
         if (error.code === '42P01') {
-           // Fallback for demo if table doesn't exist
            const mockFrame: FrameTemplate = {
              id: Math.random().toString(36).substr(2, 9),
              name: frameData.name,
-             imageUrl: frameData.image_url,
-             requiredPhotos: frameData.required_photos,
+             image_url: frameData.image_url,
+             required_photos: frameData.required_photos,
+             is_system: false,
              created_at: frameData.created_at,
-             color: 'bg-slate-100',
+             color: 'bg-pink-50',
            };
            setUserFrames([mockFrame, ...userFrames]);
            setIsUploading(false);
@@ -155,15 +157,7 @@ export default function DashboardPage() {
       }
 
       if (data) {
-        const newFrameFromDb: FrameTemplate = {
-          id: data[0].id,
-          name: data[0].name,
-          imageUrl: data[0].image_url,
-          requiredPhotos: data[0].required_photos,
-          created_at: data[0].created_at,
-          color: 'bg-slate-100',
-        };
-        setUserFrames([newFrameFromDb, ...userFrames]);
+        setUserFrames([data[0], ...userFrames]);
       }
       
       setIsUploading(false);
@@ -176,7 +170,9 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDeleteFrame = async (frameId: string) => {
+  const handleDeleteFrame = async (e: React.MouseEvent, frameId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this template?')) return;
 
     try {
@@ -188,7 +184,6 @@ export default function DashboardPage() {
 
       if (error) throw error;
 
-      // Update local state
       setUserFrames(userFrames.filter(f => f.id !== frameId));
     } catch (error: any) {
       console.error('Error deleting frame:', error);
@@ -246,7 +241,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Stats Column */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-3 space-y-8">
             <div className="bg-white p-10 rounded-[3rem] border-4 border-y2k-primary shadow-[12px_12px_0_0_#2F020C] space-y-6">
                 <div className="flex items-center gap-3 border-b-2 border-y2k-primary/10 pb-4">
                     <LayoutGrid className="text-y2k-primary" size={24} />
@@ -254,13 +249,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-4">
                     <div className="flex justify-between items-center bg-y2k-bg p-4 rounded-2xl border-2 border-y2k-primary">
-                        <span className="text-xs font-black uppercase tracking-widest text-y2k-primary/60">Total Templates</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-y2k-primary/60">Templates</span>
                         <span className="text-3xl font-heading font-black">{userFrames.length}</span>
                     </div>
                 </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="bg-y2k-primary p-8 rounded-[3rem] text-white shadow-[12px_12px_0_0_#2F020C] border-4 border-y2k-shadow">
                 <h4 className="text-2xl font-heading font-black lowercase mb-4">Pro Tip!</h4>
                 <p className="text-sm font-bold opacity-80 leading-relaxed italic">
@@ -270,7 +264,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Templates Column */}
-        <div className="lg:col-span-8 space-y-12">
+        <div className="lg:col-span-9 space-y-12">
             {/* Upload Area */}
             <section className="group space-y-8">
                 <input 
@@ -287,7 +281,9 @@ export default function DashboardPage() {
                   <div className="absolute inset-0 bg-[radial-gradient(#420D19_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.05]"></div>
                   
                   {previewUrl ? (
-                    <img src={previewUrl} alt="Frame Preview" className="absolute inset-0 w-full h-full object-contain p-8 z-10 animate-in fade-in zoom-in duration-500" />
+                    <div className="relative w-full h-full aspect-[3/4] max-h-[400px]">
+                      <Image src={previewUrl} alt="Frame Preview" fill className="object-contain p-8 z-10 animate-in fade-in zoom-in duration-500" />
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center z-10">
                       <div className="bg-white p-6 rounded-2xl border-4 border-y2k-primary mb-6 text-y2k-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 shadow-[4px_4px_0_0_#2F020C]">
@@ -296,6 +292,7 @@ export default function DashboardPage() {
                       <h3 className="text-3xl font-heading font-black text-y2k-primary text-center lowercase tracking-tighter">
                         Upload Custom Frame
                       </h3>
+                      <p className="text-y2k-primary/40 font-bold text-xs uppercase tracking-widest mt-2">PNG Format Only</p>
                     </div>
                   )}
                 </label>
@@ -359,40 +356,68 @@ export default function DashboardPage() {
                     <RefreshCw className="animate-spin text-y2k-primary/20" size={48} />
                   </div>
                 ) : userFrames.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                     {userFrames.map((frame) => (
-                      <div key={frame.id} className="group relative">
-                          <div className="aspect-[3/4] border-4 border-y2k-primary rounded-3xl bg-white shadow-[12px_12px_0_0_#2F020C] overflow-hidden flex flex-col transition-all duration-500 group-hover:-translate-y-4">
-                              <div className={`flex-1 ${frame.color || 'bg-y2k-bg'} flex items-center justify-center relative overflow-hidden`}>
-                                   <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]"></div>
-                                   <ImageIcon size={60} strokeWidth={1} className="text-y2k-primary/10 group-hover:scale-125 transition-transform duration-700" />
-                                   
-                                   <div className="absolute bottom-6 left-6 bg-white border-2 border-y2k-primary px-4 py-1.5 rounded-full text-[10px] font-black text-y2k-primary uppercase tracking-widest shadow-[2px_2px_0_0_#2F020C]">
-                                      {frame.requiredPhotos} Slots
-                                   </div>
-
-                                   <button 
-                                      onClick={() => handleDeleteFrame(frame.id)}
-                                      className="absolute top-8 right-8 bg-white border-2 border-y2k-primary hover:bg-red-500 hover:text-white text-y2k-primary p-3 rounded-2xl transition-all shadow-[2px_2px_0_0_#2F020C]"
-                                   >
-                                      <Trash2 size={20} />
-                                   </button>
-                              </div>
-                              <div className="p-8 bg-white flex justify-between items-center border-t-4 border-y2k-primary">
-                                  <div>
-                                      <p className="font-heading font-black text-2xl text-y2k-primary lowercase tracking-tight">{frame.name}</p>
-                                      <p className="text-[10px] font-black text-y2k-primary/40 uppercase tracking-widest mt-1">
-                                        {new Date(frame.created_at).toLocaleDateString()}
-                                      </p>
-                                  </div>
-                                  <Link href={`/booth?templateId=${frame.id}`}>
-                                      <Button variant="ghost" className="w-14 h-14 rounded-2xl bg-y2k-bg text-y2k-primary/40 hover:text-y2k-primary hover:bg-white border-2 border-y2k-primary/10 hover:border-y2k-primary p-0 transition-all active:scale-90 shadow-[2px_2px_0_0_#2F020C]">
-                                          <ChevronRight size={32} strokeWidth={3} />
-                                      </Button>
-                                  </Link>
-                              </div>
+                      <Link 
+                        key={frame.id} 
+                        href={`/booth?templateId=${frame.id}`}
+                        className="group relative flex flex-col overflow-hidden rounded-[2rem] border-4 border-y2k-primary bg-white transition-all hover:-translate-y-2 hover:shadow-[8px_8px_0_0_#2F020C] cursor-pointer"
+                      >
+                        {/* THUMBNAIL AREA */}
+                        <div className={`relative aspect-[3/4] ${frame.color || (frame.is_system ? 'bg-blue-50' : 'bg-pink-50')} flex items-center justify-center overflow-hidden p-6 border-b-4 border-y2k-primary`}>
+                          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                          
+                          <div className="relative w-full h-full transition-transform duration-500 group-hover:scale-110">
+                            <Image 
+                              src={frame.image_url}
+                              alt={frame.name}
+                              fill
+                              className="object-contain"
+                            />
                           </div>
-                      </div>
+
+                          {/* SYSTEM/USER BADGE */}
+                          <div className="absolute top-4 left-4 bg-y2k-primary text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-1 border-2 border-white shadow-md z-20">
+                            {frame.is_system ? <Zap size={8} fill="currentColor" /> : <Star size={8} fill="currentColor" />} 
+                            {frame.is_system ? (frame.category || 'Official') : 'Custom'}
+                          </div>
+
+                          {/* DELETE BUTTON (Only for custom frames) */}
+                          {!frame.is_system && (
+                            <button 
+                              onClick={(e) => handleDeleteFrame(e, frame.id)}
+                              className="absolute top-4 right-4 bg-white border-2 border-y2k-primary hover:bg-red-500 hover:text-white text-y2k-primary p-2 rounded-xl transition-all shadow-[2px_2px_0_0_#2F020C] z-30 opacity-0 group-hover:opacity-100"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+
+                          {/* SLOT BADGE */}
+                          <div className="absolute bottom-4 right-4 bg-white border-2 border-y2k-primary px-3 py-1 rounded-xl shadow-[2px_2px_0_0_#2F020C] flex items-center gap-1.5 transform -rotate-2 z-20">
+                            <Camera size={10} className="text-y2k-primary" />
+                            <span className="text-[10px] font-black uppercase tracking-tight">{frame.required_photos} Slots</span>
+                          </div>
+                        </div>
+
+                        {/* INFO AREA */}
+                        <div className="p-5 flex flex-col gap-3 bg-white flex-1 justify-between">
+                          <div className="space-y-1">
+                            <h3 className="font-heading font-black text-xl text-y2k-primary lowercase tracking-tight line-clamp-1">
+                              {frame.name}
+                            </h3>
+                            <div className="flex items-center gap-1 text-[8px] font-black text-y2k-primary/40 uppercase tracking-widest">
+                              {frame.is_system ? <Star size={8} fill="currentColor" /> : <RefreshCw size={8} />} 
+                              {frame.is_system ? 'Official Asset' : 'Private Studio Asset'}
+                            </div>
+                          </div>
+                          
+                          <Button 
+                            className="w-full h-10 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white font-black text-[10px] tracking-widest uppercase border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all active:scale-95"
+                          >
+                            USE FRAME
+                          </Button>
+                        </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export default function LandingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 font-serif text-y2k-primary">
+    <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 font-serif text-y2k-primary">
       <section className="text-center space-y-10 max-w-4xl mx-auto">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-6 py-2 bg-y2k-card text-y2k-primary rounded-full text-xs font-black uppercase tracking-[0.2em] animate-bounce border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
@@ -37,11 +37,6 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
-
-      {/* Decorative Floating Icon */}
-      <div className="mt-32 flex justify-center opacity-10">
-        <Camera size={200} strokeWidth={0.5} className="text-y2k-primary rotate-12" />
-      </div>
     </div>
   );
 }
