@@ -377,7 +377,7 @@ export default function DashboardPage() {
                     {userFrames.map((frame) => (
                       <Link 
                         key={frame.id} 
-                        href={`/booth?templateId=${frame.id}`}
+                        href={`/booth?templateId=${frame.id}&slots=${frame.required_photos}`}
                         className="group relative flex flex-col overflow-hidden rounded-[2rem] border-4 border-y2k-primary bg-white transition-all hover:-translate-y-2 hover:shadow-[8px_8px_0_0_#2F020C] cursor-pointer"
                       >
                         {/* THUMBNAIL AREA */}

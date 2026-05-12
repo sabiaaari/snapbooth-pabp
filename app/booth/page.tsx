@@ -106,6 +106,10 @@ function BoothContent() {
   const [inputMode, setInputMode] = useState<InputMode>('camera');
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<FrameTemplate>(initialTemplate); 
+  
+  // Use dynamic required photos from template
+  const requiredPhotos = selectedTemplate?.requiredPhotos ?? 4;
+
   const [delay, setDelay] = useState(3);
   const [isMirror, setIsMirror] = useState(true);
   const [isFlash, setIsFlash] = useState(false);
@@ -217,7 +221,7 @@ function BoothContent() {
   };
 
   const runSequence = (index: number) => {
-    if (index >= selectedTemplate.requiredPhotos) {
+    if (index >= requiredPhotos) {
       setIsSessionActive(false);
       return;
     }
@@ -249,7 +253,7 @@ function BoothContent() {
 
   // REDIRECT LOGIC: Watch for session completion
   useEffect(() => {
-    if (capturedPhotos.length > 0 && capturedPhotos.length === selectedTemplate.requiredPhotos) {
+    if (capturedPhotos.length > 0 && capturedPhotos.length === requiredPhotos) {
       sessionStorage.setItem('currentSessionPhotos', JSON.stringify(capturedPhotos));
       sessionStorage.setItem('selectedTemplate', JSON.stringify(selectedTemplate));
       
@@ -311,7 +315,7 @@ function BoothContent() {
     if (files.length === 0) return;
 
     // Hitung berapa sisa slot kosong
-    const slotsAvailable = selectedTemplate.requiredPhotos - capturedPhotos.length;
+    const slotsAvailable = requiredPhotos - capturedPhotos.length;
     if (slotsAvailable <= 0) return;
     
     // Ambil file sebanyak sisa slot kosong
@@ -337,7 +341,7 @@ function BoothContent() {
     const droppedFiles = Array.from(e.dataTransfer.files);
     if (droppedFiles.length === 0) return;
 
-    const slotsAvailable = selectedTemplate.requiredPhotos - capturedPhotos.length;
+    const slotsAvailable = requiredPhotos - capturedPhotos.length;
     if (slotsAvailable <= 0) return;
 
     const filesToAdd = droppedFiles.filter(f => f.type.startsWith('image/')).slice(0, slotsAvailable);
@@ -526,12 +530,12 @@ function BoothContent() {
                   <h3 className="font-heading font-black text-2xl text-y2k-primary lowercase">Photos</h3>
                 </div>
                 <span className="text-xs font-black px-4 py-1.5 bg-y2k-bg text-y2k-primary rounded-full border-2 border-y2k-primary tracking-widest">
-                  {capturedPhotos.length}/{selectedTemplate.requiredPhotos}
+                  {capturedPhotos.length}/{requiredPhotos}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {Array.from({ length: selectedTemplate.requiredPhotos }).map((_, index) => (
+                {Array.from({ length: requiredPhotos }).map((_, index) => (
                   <div 
                     key={index} 
                     className={`aspect-[3/4] rounded-2xl flex items-center justify-center relative overflow-hidden transition-all duration-500 border-4 ${index < capturedPhotos.length ? 'border-y2k-primary bg-white scale-[0.98]' : 'border-dashed border-y2k-primary/20 bg-white/50'}`}
@@ -547,7 +551,7 @@ function BoothContent() {
 
               <div className="space-y-3 pt-4">
                 <Button 
-                  disabled={capturedPhotos.length < selectedTemplate.requiredPhotos || isSessionActive}
+                  disabled={capturedPhotos.length < requiredPhotos || isSessionActive}
                   onClick={() => router.push('/result')}
                   className="w-full h-16 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow gap-3 transition-all active:scale-95 disabled:opacity-50 uppercase shadow-[4px_4px_0_0_#2F020C]"
                 >

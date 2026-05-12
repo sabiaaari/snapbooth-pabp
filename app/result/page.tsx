@@ -589,7 +589,7 @@ function ResultContent() {
                 {isDownloading ? '...' : 'SAVE TO DEVICE'}
               </Button>
 
-              <Link href="/booth">
+              <Link href={`/booth?templateId=${templateId}&slots=${template?.requiredPhotos ?? 4}`}>
                 <Button variant="outline" className="w-full h-16 rounded-full border-4 border-y2k-primary text-y2k-primary bg-white hover:bg-y2k-card font-black text-sm tracking-widest gap-2 shadow-[4px_4px_0_0_#2F020C]">
                   <RefreshCw size={20} strokeWidth={3} />
                   RETAKE PHOTOS
