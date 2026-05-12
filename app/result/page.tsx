@@ -517,10 +517,10 @@ function ResultContent() {
       </div>
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        <div className="lg:col-span-8 flex flex-col items-center w-full">
-          <div className="relative group">
+        <div className="lg:col-span-8 flex flex-col items-center w-full overflow-hidden">
+          <div className="relative group w-full max-w-md mx-auto">
             <div className="absolute -inset-4 bg-y2k-primary/10 rounded-[4rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative h-[65vh] md:h-[75vh] w-auto aspect-[1/3] mx-auto bg-white overflow-hidden shadow-[12px_12px_0_0_#2F020C] rounded-md flex-shrink-0 border-4 border-y2k-primary">
+            <div className="relative w-full h-auto aspect-[1/3] mx-auto bg-white overflow-hidden shadow-[12px_12px_0_0_#2F020C] rounded-md flex-shrink-0 border-4 border-y2k-primary">
               <canvas
                 ref={canvasRef}
                 onMouseDown={handleMouseDown}

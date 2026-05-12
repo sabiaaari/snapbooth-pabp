@@ -15,7 +15,8 @@ import {
   RefreshCw, 
   Star, 
   Zap, 
-  Camera 
+  Camera,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -207,7 +208,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-20 py-10 font-serif text-y2k-primary">
+    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-20 py-10 font-serif text-y2k-primary">
       {/* Header Profile */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-12 border-b-4 border-y2k-primary/10 pt-20">
         <div className="space-y-4">
@@ -271,8 +272,18 @@ export default function DashboardPage() {
 
         {/* Templates Column */}
         <div className="lg:col-span-9 space-y-12">
-            {/* Upload Area */}
-            <section className="group space-y-8">
+            {/* Creator Fallback (Mobile) */}
+            <div className="flex md:hidden flex-col items-center justify-center text-center p-6 bg-white border-4 border-dashed border-y2k-primary rounded-[2rem] shadow-[4px_4px_0_0_#2F020C] gap-4">
+                <div className="bg-y2k-bg p-4 rounded-full border-2 border-y2k-primary text-y2k-primary">
+                    <Info size={32} />
+                </div>
+                <p className="text-sm font-bold text-y2k-primary leading-relaxed">
+                    Fitur Snapbooth Studio membutuhkan layar yang lebih besar. Silakan buka melalui Desktop/Laptop untuk mendesain template, atau gunakan Aplikasi Mobile Snapbooth di HP Anda untuk langsung berfoto!
+                </p>
+            </div>
+
+            {/* Upload Area (Desktop) */}
+            <section className="hidden md:flex flex-col group space-y-8">
                 <input 
                   type="file" 
                   id="custom-frame-upload" 
@@ -362,7 +373,7 @@ export default function DashboardPage() {
                     <RefreshCw className="animate-spin text-y2k-primary/20" size={48} />
                   </div>
                 ) : userFrames.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {userFrames.map((frame) => (
                       <Link 
                         key={frame.id} 

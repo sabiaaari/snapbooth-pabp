@@ -57,7 +57,7 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto w-full px-8 md:px-12 lg:px-16 space-y-20 py-10 font-serif text-y2k-primary">
+    <div className="max-w-5xl mx-auto w-full p-4 md:p-8 space-y-20 font-serif text-y2k-primary">
       <header className="text-center space-y-6 max-w-3xl mx-auto pt-4">
         <div className="inline-flex items-center gap-2 px-6 py-2 bg-white text-y2k-primary rounded-full text-xs font-black uppercase tracking-[0.2em] mb-4 border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <Sparkles size={14} />
@@ -76,7 +76,7 @@ export default function TemplatesPage() {
           <RefreshCw className="animate-spin text-y2k-primary/20" size={48} />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {templates.map((template) => (
             <div 
               key={template.id} 
