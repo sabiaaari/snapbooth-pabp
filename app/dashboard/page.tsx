@@ -233,7 +233,7 @@ export default function DashboardPage() {
               </div>
               <div>
                   <p className="font-black text-xl text-y2k-primary leading-tight">{profileName}</p>
-                  <p className="text-[10px] font-black text-y2k-primary uppercase tracking-widest mt-1 opacity-60">Snap Pro Member</p>
+                  <p className="text-[10px] font-black text-y2k-primary uppercase tracking-widest mt-1 opacity-60">Snap Member</p>
               </div>
           </div>
           <Button 
@@ -278,7 +278,7 @@ export default function DashboardPage() {
                     <Info size={32} />
                 </div>
                 <p className="text-sm font-bold text-y2k-primary leading-relaxed">
-                    Fitur Snapbooth Studio membutuhkan layar yang lebih besar. Silakan buka melalui Desktop/Laptop untuk mendesain template, atau gunakan Aplikasi Mobile Snapbooth di HP Anda untuk langsung berfoto!
+                    The Snapbooth Studio feature requires a larger screen. Please open it on your desktop or laptop to design templates, or use the Snapbooth mobile app on your phone to take photos right away!
                 </p>
             </div>
 

@@ -222,7 +222,7 @@ function BoothContent() {
       return;
     }
 
-    let count = 3;
+    let count = delay;
     setTimeLeft(count);
     setIsActive(true);
 
