@@ -100,37 +100,37 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-y2k-bg flex items-center justify-center p-4 font-serif text-y2k-primary py-20">
+    <div className="min-h-[calc(100vh-80px)] bg-y2k-bg flex flex-col items-center justify-center p-4 font-serif text-y2k-primary">
       {/* Back Button - Outside Card */}
-      <div className="fixed top-28 left-8 z-50">
+      <div className="fixed top-24 left-8 z-50 hidden md:block">
         <Link href="/" className="inline-flex items-center gap-2 text-y2k-primary/60 hover:text-y2k-primary font-black transition-colors bg-white px-4 py-2 rounded-full border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
           <ChevronLeft size={20} strokeWidth={3} />
           BACK
         </Link>
       </div>
 
-      <div className="w-full max-w-md bg-white border-4 border-y2k-primary rounded-3xl shadow-[16px_16px_0_0_#2F020C] p-10 space-y-10 relative overflow-hidden">
+      <div className="w-full max-w-sm bg-white border-4 border-y2k-primary rounded-3xl shadow-[10px_10px_0_0_#2F020C] p-6 space-y-4 relative overflow-hidden">
         {/* Decorative Notepad Background Element */}
         <div className="absolute inset-0 notizblok opacity-5 pointer-events-none"></div>
 
-        <div className="text-center space-y-4 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1 bg-y2k-bg text-y2k-primary rounded-full text-[10px] font-black uppercase tracking-widest border-2 border-y2k-primary mb-2">
-            <Sparkles size={12} />
+        <div className="text-center space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-y2k-bg text-y2k-primary rounded-full text-[9px] font-black uppercase tracking-widest border-2 border-y2k-primary mb-1">
+            <Sparkles size={10} />
             <span>Join the Studio</span>
           </div>
-          <h1 className="text-6xl font-heading font-black text-y2k-primary lowercase leading-none">
+          <h1 className="text-3xl font-heading font-black text-y2k-primary lowercase leading-none">
             SnapBooth
           </h1>
-          <p className="text-xl text-y2k-primary font-bold italic leading-tight">
-            Create your account <br /> to start snapping!
+          <p className="text-sm text-y2k-primary font-bold italic leading-tight">
+            Create your account to start snapping!
           </p>
         </div>
 
-        <div className="space-y-6 relative z-10">
-          <form onSubmit={handleEmailRegister} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
-                <User size={12} /> Username
+        <div className="space-y-3 relative z-10">
+          <form onSubmit={handleEmailRegister} className="space-y-2">
+            <div className="space-y-0.5">
+              <label className="text-[9px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
+                <User size={10} /> Username
               </label>
               <input
                 type="text"
@@ -138,13 +138,13 @@ export default function RegisterPage() {
                 placeholder="snaplover2026"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
+                className="w-full h-10 px-5 rounded-xl border-2 border-y2k-primary bg-white font-bold text-sm text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none transition-all shadow-[3px_3px_0_0_#2F020C]"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
-                <Mail size={12} /> Email Address
+            <div className="space-y-0.5">
+              <label className="text-[9px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
+                <Mail size={10} /> Email Address
               </label>
               <input
                 type="email"
@@ -152,13 +152,13 @@ export default function RegisterPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
+                className="w-full h-10 px-5 rounded-xl border-2 border-y2k-primary bg-white font-bold text-sm text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none transition-all shadow-[3px_3px_0_0_#2F020C]"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
-                <Lock size={12} /> Password
+            <div className="space-y-0.5">
+              <label className="text-[9px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
+                <Lock size={10} /> Password
               </label>
               <input
                 type="password"
@@ -166,20 +166,20 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-14 px-6 rounded-2xl border-2 border-y2k-primary bg-white font-bold text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none focus:ring-4 focus:ring-y2k-primary/10 transition-all shadow-[4px_4px_0_0_#2F020C]"
+                className="w-full h-10 px-5 rounded-xl border-2 border-y2k-primary bg-white font-bold text-sm text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none transition-all shadow-[3px_3px_0_0_#2F020C]"
               />
 
               {/* Password Requirements Checklist */}
-              <div className="grid grid-cols-2 gap-2 px-2 pt-1">
+              <div className="grid grid-cols-2 gap-0.5 px-2 pt-1">
                 {[
-                  { label: '8+ Characters', met: password.length >= 8 },
-                  { label: 'Uppercase', met: /[A-Z]/.test(password) },
-                  { label: 'Lowercase', met: /[a-z]/.test(password) },
+                  { label: '8+ Chars', met: password.length >= 8 },
+                  { label: 'Upper', met: /[A-Z]/.test(password) },
+                  { label: 'Lower', met: /[a-z]/.test(password) },
                   { label: 'Symbol', met: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
                 ].map((req, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <div className={`w-2 h-2 rounded-full border border-y2k-primary ${req.met ? 'bg-green-400' : 'bg-white'}`}></div>
-                    <span className={`text-[9px] font-black uppercase tracking-tighter ${req.met ? 'text-y2k-primary' : 'text-y2k-primary/30'}`}>
+                  <div key={i} className="flex items-center gap-1">
+                    <div className={`w-1.5 h-1.5 rounded-full border border-y2k-primary ${req.met ? 'bg-green-400' : 'bg-white'}`}></div>
+                    <span className={`text-[7px] font-black uppercase tracking-tighter ${req.met ? 'text-y2k-primary' : 'text-y2k-primary/30'}`}>
                       {req.label}
                     </span>
                   </div>
@@ -190,31 +190,31 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-16 rounded-2xl bg-y2k-primary hover:bg-y2k-accent text-white font-black text-lg border-2 border-y2k-shadow shadow-[4px_4px_0_0_#2F020C] transition-all active:scale-95 disabled:opacity-50"
+              className="w-full h-10 rounded-xl bg-y2k-primary hover:bg-y2k-accent text-white font-black text-xs border-2 border-y2k-shadow shadow-[3px_3px_0_0_#2F020C] transition-all active:scale-95 disabled:opacity-50 mt-2"
             >
               {isLoading ? 'REGISTERING...' : 'REGISTER NOW'}
             </Button>
           </form>
 
           {message && (
-            <div className={`p-4 rounded-xl border-2 font-bold text-sm text-center ${message.type === 'success' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700'}`}>
+            <div className={`p-2 rounded-lg border-2 font-bold text-[10px] text-center ${message.type === 'success' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-red-50 border-red-500 text-red-700'}`}>
               {message.text}
             </div>
           )}
 
-          <div className="relative flex items-center justify-center py-2">
+          <div className="relative flex items-center justify-center py-0.5">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t-2 border-y2k-primary/10"></div>
             </div>
-            <span className="relative px-4 bg-white text-[10px] font-black uppercase tracking-widest text-y2k-primary/40">OR</span>
+            <span className="relative px-3 bg-white text-[9px] font-black uppercase tracking-widest text-y2k-primary/40">OR</span>
           </div>
 
           <Button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full h-16 rounded-2xl border-2 border-y2k-primary bg-white text-y2k-primary hover:bg-y2k-card font-black text-sm flex items-center justify-center gap-4 transition-all active:scale-95 shadow-[4px_4px_0_0_#2F020C] disabled:opacity-50"
+            className="w-full h-10 rounded-xl border-2 border-y2k-primary bg-white text-y2k-primary hover:bg-y2k-card font-black text-[10px] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-[3px_3px_0_0_#2F020C] disabled:opacity-50"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -232,19 +232,19 @@ export default function RegisterPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12.16-4.53z"
               />
             </svg>
-            Continue with Google
+            Google Login
           </Button>
 
           <div className="text-center">
-            <Link href="/login" className="text-[11px] font-black uppercase tracking-wider text-y2k-primary/60 hover:text-y2k-primary transition-colors underline decoration-2">
-              Already have an account? Login here
+            <Link href="/login" className="text-[10px] font-black uppercase tracking-wider text-y2k-primary/60 hover:text-y2k-primary transition-colors underline decoration-2">
+              Have account? Login here
             </Link>
           </div>
         </div>
 
         {/* Decorative corner icon */}
         <div className="absolute -bottom-6 -right-6 text-y2k-primary/5 rotate-12">
-          <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
         </div>
