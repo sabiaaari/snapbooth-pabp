@@ -208,15 +208,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-20 py-10 font-serif text-y2k-primary">
+    <div className="w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 space-y-10 py-10 font-serif text-y2k-primary">
       {/* Header Profile */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-12 border-b-4 border-y2k-primary/10 pt-20">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 pb-12 border-b-4 border-y2k-primary/10 pt-5">
         <div className="space-y-4">
             <div className="flex items-center gap-2 text-y2k-primary font-black text-xs uppercase tracking-widest border-2 border-y2k-primary px-3 py-1 rounded-full w-fit bg-white shadow-[2px_2px_0_0_#2F020C]">
                 <Lock size={14} />
                 <span>Private Studio</span>
             </div>
-            <h2 className="text-5xl md:text-7xl font-heading font-black text-y2k-primary lowercase leading-none">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-black text-y2k-primary lowercase leading-none">
                 Welcome back, <br />
                 <span className="underline decoration-8">{profileName}!</span>
             </h2>
@@ -251,8 +251,8 @@ export default function DashboardPage() {
         <div className="lg:col-span-3 space-y-8">
             <div className="bg-white p-10 rounded-[3rem] border-4 border-y2k-primary shadow-[12px_12px_0_0_#2F020C] space-y-6">
                 <div className="flex items-center gap-3 border-b-2 border-y2k-primary/10 pb-4">
-                    <LayoutGrid className="text-y2k-primary" size={24} />
-                    <h3 className="font-heading font-black text-2xl lowercase text-y2k-primary">Your Stats</h3>
+                    <LayoutGrid className="text-y2k-primary" size={15} />
+                    <h4 className="font-heading font-black text-2xl lowercase text-y2k-primary">Your Stats</h4>
                 </div>
                 <div className="space-y-4">
                     <div className="flex justify-between items-center bg-y2k-bg p-4 rounded-2xl border-2 border-y2k-primary">
@@ -263,7 +263,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="bg-y2k-primary p-8 rounded-[3rem] text-white shadow-[12px_12px_0_0_#2F020C] border-4 border-y2k-shadow">
-                <h4 className="text-2xl font-heading font-black lowercase mb-4">Pro Tip!</h4>
+                <h4 className="text-2xl font-heading font-black lowercase mb-4">Tips!</h4>
                 <p className="text-sm font-bold opacity-80 leading-relaxed italic">
                     "Use high-quality PNGs for your frames to get the best photostrip results."
                 </p>

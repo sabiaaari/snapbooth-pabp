@@ -505,93 +505,94 @@ function ResultContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12 pt-10 pb-10 flex flex-col items-center gap-8 font-serif text-y2k-primary">
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-6 py-2 bg-white text-y2k-primary rounded-full text-xs font-black uppercase tracking-widest border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
-          <Sparkles size={14} />
+    <div className="w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 pt-4 pb-8 flex flex-col items-center gap-10 font-serif text-y2k-primary min-h-[calc(100vh-80px)]">
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center gap-2 px-6 py-1.5 bg-white text-y2k-primary rounded-full text-[10px] font-black uppercase tracking-widest border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
+          <Sparkles size={12} />
           <span>Masterpiece Ready</span>
         </div>
-        <h2 className="text-5xl md:text-7xl font-heading font-black lowercase leading-none text-y2k-primary">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading font-black lowercase leading-none text-y2k-primary">
           your <span className="underline decoration-8">snaps</span>
         </h2>
       </div>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        <div className="lg:col-span-8 flex flex-col items-center w-full overflow-hidden">
-          <div className="relative group w-full max-w-md mx-auto">
-            <div className="absolute -inset-4 bg-y2k-primary/10 rounded-[4rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative w-full h-auto aspect-[1/3] mx-auto bg-white overflow-hidden shadow-[12px_12px_0_0_#2F020C] rounded-md flex-shrink-0 border-4 border-y2k-primary">
-              <canvas
-                ref={canvasRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onWheel={handleWheel}
-                onClick={handleCanvasClick}
-                className="w-full h-full object-contain cursor-move transition-transform duration-500 hover:scale-[1.01]"
-              />
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileInputChange}
-              />
+      <div className="w-full flex-1 min-h-0 flex flex-col items-center mt-2">
+        <div className="w-full flex flex-col lg:flex-row gap-8 lg:gap-12 items-start justify-center">
+          {/* Photo Strip Column (Main Content) */}
+          <div className="flex-1 min-w-0 flex flex-col items-center">
+            <div className="relative group w-full h-[60vh] lg:h-[75vh] max-w-[280px] mx-auto flex justify-center items-center min-h-0">
+              <div className="absolute -inset-4 bg-y2k-primary/10 rounded-[4rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative h-full aspect-[1/3] bg-white overflow-hidden shadow-[12px_12px_0_0_#2F020C] rounded-md flex-shrink-0 border-4 border-y2k-primary min-h-0 flex items-center justify-center">
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onWheel={handleWheel}
+                  onClick={handleCanvasClick}
+                  className="max-h-full max-w-full w-auto h-auto object-contain cursor-move transition-transform duration-500 hover:scale-[1.01]"
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileInputChange}
+                />
+              </div>
+              <div className="absolute -top-3 -right-3 bg-y2k-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl border-4 border-white transform rotate-12 z-30 shadow-[4px_4px_0_0_#2F020C]">
+                <Check size={20} strokeWidth={4} />
+              </div>
             </div>
-            <div className="absolute -top-4 -right-4 bg-y2k-primary text-white w-20 h-20 rounded-full flex items-center justify-center shadow-2xl border-4 border-white transform rotate-12 z-30 shadow-[4px_4px_0_0_#2F020C]">
-              <Check size={32} strokeWidth={4} />
-            </div>
-          </div>
-          <div className="mt-8 text-center">
-            <p className="text-sm font-black tracking-[0.3em] text-y2k-primary uppercase">SNAPBOOTH STUDIO 2026</p>
-            <p className="text-[10px] font-bold text-y2k-primary/40 uppercase mt-2 italic">Tip: Click a photo in the strip to replace it!</p>
-          </div>
-        </div>
-
-        <div className="lg:col-span-4 space-y-8 w-full">
-          <div className="notizblok p-10 rounded-3xl border-4 border-y2k-primary shadow-[8px_8px_0_0_#2F020C] space-y-8">
-            <div className="flex items-center gap-3 border-b-2 border-y2k-primary/10 pb-4">
-              <Layers className="text-y2k-primary" size={24} />
-              <h3 className="font-heading font-black text-2xl lowercase text-y2k-primary">Style & Filter</h3>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {filters.map((f) => (
-                <button
-                  key={f.name}
-                  onClick={() => setFilter(f.class)}
-                  className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${filter === f.class ? 'border-y2k-primary bg-y2k-bg shadow-[4px_4px_0_0_#2F020C]' : 'border-y2k-primary/10 bg-white hover:border-y2k-primary'}`}
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-y2k-primary to-y2k-accent ${f.class} border-2 border-y2k-primary`}></div>
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${filter === f.class ? 'text-y2k-primary' : 'text-y2k-primary/40'}`}>
-                    {f.name}
-                  </span>
-                </button>
-              ))}
+            <div className="mt-8 text-center">
+              <p className="text-[10px] font-black tracking-[0.4em] text-y2k-primary/60 uppercase">SNAPBOOTH STUDIO 2026</p>
+              <p className="text-[9px] font-bold text-y2k-primary/30 uppercase mt-2 italic">Tip: Click a photo to replace it!</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          {/* Style & Filters Column (Sidebar) */}
+          <div className="w-full lg:w-96 max-w-md flex flex-col gap-6">
+            <div className="notizblok p-6 md:p-8 rounded-[2.5rem] border-4 border-y2k-primary shadow-[10px_10px_0_0_#2F020C] space-y-6 max-h-[60vh] lg:max-h-[70vh] overflow-y-auto custom-scrollbar bg-white">
+              <div className="flex items-center gap-3 border-b-2 border-y2k-primary/10 pb-3">
+                <Layers className="text-y2k-primary" size={20} />
+                <h3 className="font-heading font-black text-xl lowercase text-y2k-primary">Style & Filter</h3>
+              </div>
 
-            <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-3">
+                {filters.map((f) => (
+                  <button
+                    key={f.name}
+                    onClick={() => setFilter(f.class)}
+                    className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${filter === f.class ? 'border-y2k-primary bg-y2k-bg shadow-[4px_4px_0_0_#2F020C]' : 'border-y2k-primary/10 bg-white hover:border-y2k-primary'}`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-y2k-primary to-y2k-accent ${f.class} border-2 border-y2k-primary`}></div>
+                    <span className={`text-[9px] font-black uppercase tracking-widest ${filter === f.class ? 'text-y2k-primary' : 'text-y2k-primary/40'}`}>
+                      {f.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
               <Button
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="w-full h-15 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white text-1xl font-serif font-black shadow-[4px_4px_0_0_#2F020C] transition-all hover:scale-90 active:scale-90 flex gap-4 border-2 border-y2k-shadow disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full h-16 rounded-full bg-y2k-primary hover:bg-y2k-accent text-white text-xl font-serif font-black shadow-[6px_6px_0_0_#2F020C] transition-all hover:scale-95 active:scale-90 flex gap-4 border-2 border-y2k-shadow disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isDownloading ? (
-                  <RefreshCw size={16} strokeWidth={3} className="animate-spin" />
+                  <RefreshCw size={18} strokeWidth={3} className="animate-spin" />
                 ) : (
-                  <Download size={16} strokeWidth={3} />
+                  <Download size={18} strokeWidth={3} />
                 )}
-                {isDownloading ? 'PROCESSING...' : 'DOWNLOAD'}
+                {isDownloading ? '...' : 'SAVE TO DEVICE'}
               </Button>
 
               <Link href="/booth">
                 <Button variant="outline" className="w-full h-16 rounded-full border-4 border-y2k-primary text-y2k-primary bg-white hover:bg-y2k-card font-black text-sm tracking-widest gap-2 shadow-[4px_4px_0_0_#2F020C]">
-                  <RefreshCw size={18} strokeWidth={3} />
-                  RETAKE
+                  <RefreshCw size={20} strokeWidth={3} />
+                  RETAKE PHOTOS
                 </Button>
               </Link>
             </div>
@@ -599,8 +600,8 @@ function ResultContent() {
         </div>
       </div>
 
-      <Link href="/">
-        <Button variant="ghost" className="text-y2k-primary/40 hover:text-y2k-primary font-bold flex gap-2">
+      <Link href="/" className="flex-shrink-0">
+        <Button variant="ghost" className="text-y2k-primary/40 hover:text-y2k-primary font-bold flex gap-2 h-10 mt-2">
           <ArrowLeft size={16} strokeWidth={3} />
           BACK TO HOME
         </Button>
