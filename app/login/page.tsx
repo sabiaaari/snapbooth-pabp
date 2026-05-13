@@ -22,12 +22,16 @@ export default function LoginPage() {
     setMessage(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Auth Error (Login):', error.message, error);
+        alert(`Login Error: ${error.message}`);
+        throw error;
+      }
       
       router.push('/dashboard');
     } catch (error: any) {
@@ -47,7 +51,11 @@ export default function LoginPage() {
           redirectTo: `${getURL()}dashboard`,
         },
       });
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Auth Error (Google Login):', error.message, error);
+        alert(`Google Login Error: ${error.message}`);
+        throw error;
+      }
     } catch (error: any) {
       console.error('Google login failed:', error);
       setMessage({ type: 'error', text: 'Google login failed.' });

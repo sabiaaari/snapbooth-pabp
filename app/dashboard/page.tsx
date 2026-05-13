@@ -125,13 +125,51 @@ export default function DashboardPage() {
   };
 
   const handleSaveFrame = async () => {
-    if (!user) return;
+    if (!user || (!selectedFrame && !previewUrl)) return;
 
     try {
+      // 1. Ubah data gambar menjadi Blob/File yang valid
+      // Kita prioritaskan selectedFrame (File), jika tidak ada gunakan previewUrl (Base64)
+      let fileToUpload: Blob | File | null = selectedFrame;
+      
+      if (!fileToUpload && previewUrl && previewUrl.startsWith('data:')) {
+        // Konversi Data URL (Base64) ke Blob jika diperlukan
+        const response = await fetch(previewUrl);
+        fileToUpload = await response.blob();
+      }
+
+      if (!fileToUpload) {
+        alert('Mohon pilih file gambar terlebih dahulu!');
+        return;
+      }
+
+      // 2. Lakukan upload fisik ke Supabase Storage
+      // Pastikan Anda sudah membuat bucket bernama 'frame-assets' di Supabase Storage
+      const fileName = `${user.id}-${Date.now()}.png`;
+      const filePath = `user_frames/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('frame-assets') // Menggunakan nama bucket 'frame-assets'
+        .upload(filePath, fileToUpload, {
+          contentType: 'image/png',
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(`Gagal mengupload file ke Storage: ${uploadError.message}`);
+      }
+
+      // 3. Ambil Public URL-nya
+      const { data: { publicUrl } } = supabase.storage
+        .from('frame-assets')
+        .getPublicUrl(filePath);
+
+      // 4. Simpan Public URL tersebut ke dalam tabel database Supabase
       const frameData = {
         user_id: user.id,
         name: newFrame.name || 'Untitled Frame',
-        image_url: previewUrl || '/placeholder-frame.png',
+        image_url: publicUrl,
         required_photos: newFrame.requiredPhotos,
         is_system: false,
         created_at: new Date().toISOString(),
@@ -144,6 +182,7 @@ export default function DashboardPage() {
 
       if (error) {
         if (error.code === '42P01') {
+           // Fallback jika tabel belum dibuat (hanya untuk demo/development)
            const mockFrame: FrameTemplate = {
              id: Math.random().toString(36).substr(2, 9),
              name: frameData.name,
@@ -171,9 +210,10 @@ export default function DashboardPage() {
       setNewFrame({ name: '', requiredPhotos: 4 });
       setPreviewUrl(null);
       setSelectedFrame(null);
+      alert('Frame berhasil disimpan ke Studio!');
     } catch (error: any) {
       console.error('Error saving frame:', error);
-      alert('Failed to save frame: ' + (error.message || 'Unknown error'));
+      alert('Gagal menyimpan frame: ' + (error.message || 'Unknown error'));
     }
   };
 

@@ -55,9 +55,13 @@ export default function RegisterPage() {
         }
       });
 
-      if (error) throw error;
-      if (data.user) {
+      if (error) {
+        console.error('Supabase Auth Error (Register):', error.message, error);
+        alert(`Registration Error: ${error.message}`);
+        throw error;
+      }
 
+      if (data.user) {
         const { error: profileError } =
           await supabase
             .from('profiles')
@@ -69,6 +73,8 @@ export default function RegisterPage() {
             });
 
         if (profileError) {
+          console.error('Supabase DB Error (Profile Creation):', profileError.message, profileError);
+          alert(`Profile Creation Error: ${profileError.message}`);
           throw profileError;
         }
       }
@@ -91,7 +97,11 @@ export default function RegisterPage() {
           redirectTo: `${window.location.origin}/dashboard`,
         },
       });
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Auth Error (Google Register):', error.message, error);
+        alert(`Google Registration Error: ${error.message}`);
+        throw error;
+      }
     } catch (error: any) {
       console.error('Google login failed:', error);
       setMessage({ type: 'error', text: 'Google login failed.' });
