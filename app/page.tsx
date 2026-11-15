@@ -11,7 +11,6 @@ export default function LandingPage() {
       <section className="text-center space-y-10 max-w-4xl mx-auto">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-6 py-2 bg-y2k-card text-y2k-primary rounded-full text-xs font-black uppercase tracking-[0.2em] animate-bounce border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
-          <Sparkles size={14} />
           <span>SnapBooth Experience 2026</span>
         </div>
 

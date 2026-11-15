@@ -276,13 +276,6 @@ export default function DashboardPage() {
                   <p className="text-[10px] font-black text-y2k-primary uppercase tracking-widest mt-1 opacity-60">Snap Member</p>
               </div>
           </div>
-          <Button 
-            variant="ghost" 
-            onClick={handleLogout}
-            className="self-end text-y2k-primary/40 hover:text-red-500 font-black text-xs uppercase tracking-widest flex gap-2 transition-colors"
-          >
-            <LogOut size={16} /> Sign Out
-          </Button>
         </div>
       </header>
 

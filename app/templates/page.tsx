@@ -60,7 +60,6 @@ export default function TemplatesPage() {
     <div className="max-w-5xl mx-auto w-full p-4 md:p-8 space-y-20 font-serif text-y2k-primary">
       <header className="text-center space-y-6 max-w-3xl mx-auto pt-4">
         <div className="inline-flex items-center gap-2 px-6 py-2 bg-white text-y2k-primary rounded-full text-xs font-black uppercase tracking-[0.2em] mb-4 border-2 border-y2k-primary shadow-[4px_4px_0_0_#2F020C]">
-          <Sparkles size={14} />
           <span>Curated by SnapBooth</span>
         </div>
         <h2 className="text-5xl md:text-7xl font-heading font-black lowercase text-y2k-primary">

@@ -78,10 +78,6 @@ export default function LoginPage() {
         <div className="absolute inset-0 notizblok opacity-5 pointer-events-none"></div>
 
         <div className="text-center space-y-2 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-y2k-bg text-y2k-primary rounded-full text-[9px] font-black uppercase tracking-widest border-2 border-y2k-primary mb-1">
-            <Sparkles size={10} />
-            <span>Studio Access</span>
-          </div>
           <h1 className="text-3xl font-heading font-black text-y2k-primary lowercase leading-none">
             SnapBooth
           </h1>
