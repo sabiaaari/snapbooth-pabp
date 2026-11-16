@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("postgresql://snapbooth_admin:rahasia_admin@192.168.43.105:5432/snapbooth_db?schema=public")
+}
+
+model Template {
+  id              String   @id @default(uuid())
+  user_id         String?
+  name            String
+  image_url       String
+  required_photos Int      @default(4)
+  is_system       Boolean  @default(false)
+  category        String?
+  color           String?
+  created_at      DateTime @default(now())
+}
