@@ -9,7 +9,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://snapbooth_admin:rahasia_admin@192.168.43.105:5432/snapbooth_db?schema=public")
+  url      = env("DATABASE_URL")
 }
 
 model Template {

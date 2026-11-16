@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { FrameTemplate } from '../booth/page';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+// IMPORT SERVER ACTION UNTUK PRISMA:
+import { getTemplateById } from '@/app/actions/template';
 
 const loadImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
@@ -265,22 +267,14 @@ function ResultContent() {
       if (!templateId) return;
 
       try {
+        // Cek user login tetap menggunakan Supabase Auth
         const { data: { user } } = await supabase.auth.getUser();
 
-        let query = supabase.from('templates').select('*');
+        // Ambil data template dari PostgreSQL (CT 105) via Prisma Server Action
+        const data = await getTemplateById(templateId, user?.id);
 
-        if (user) {
-          query = query.or(`user_id.eq.${user.id},is_system.eq.true`);
-        } else {
-          query = query.eq('is_system', true);
-        }
-
-        const { data, error } = await query
-          .eq('id', templateId)
-          .single();
-
-        if (error) {
-          // If not in DB, check if it's a system template in localStorage
+        if (!data) {
+          // Jika tidak ada di database, cek apakah ini template custom yang tersimpan di localStorage
           const savedTemplate = localStorage.getItem('selectedTemplate');
           if (savedTemplate) {
             const parsed = JSON.parse(savedTemplate);
@@ -289,19 +283,17 @@ function ResultContent() {
               return;
             }
           }
-          throw error;
+          throw new Error("Template not found");
         }
 
-        if (data) {
-          setTemplate({
-            id: data.id,
-            name: data.name,
-            imageUrl: data.image_url,
-            requiredPhotos: data.required_photos,
-            thumbColor: 'bg-y2k-bg',
-            slots: data.slots || []
-          });
-        }
+        setTemplate({
+          id: data.id,
+          name: data.name,
+          imageUrl: data.image_url,
+          requiredPhotos: data.required_photos,
+          thumbColor: data.color || 'bg-y2k-bg',
+          slots: [] // Fallback karena PostgreSQL tidak menyimpan data slots
+        });
       } catch (err) {
         console.error("Error fetching template:", err);
       }

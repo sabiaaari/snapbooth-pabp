@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+// IMPORT SERVER ACTION UNTUK PRISMA:
+import { getTemplates } from '@/app/actions/template';
 
 export type Template = {
   id: string;
@@ -14,9 +16,9 @@ export type Template = {
   image_url: string;
   required_photos: number;
   is_system: boolean;
-  user_id?: string;
-  category?: string;
-  color?: string;
+  user_id?: string | null;
+  category?: string | null;
+  color?: string | null;
 };
 
 export default function TemplatesPage() {
@@ -28,19 +30,13 @@ export default function TemplatesPage() {
     const fetchTemplates = async () => {
       setIsLoading(true);
       try {
+        // 1. Cek sesi login (Tetap menggunakan Supabase Auth)
         const { data: { user } } = await supabase.auth.getUser();
         
-        let query = supabase.from('templates').select('*');
+        // 2. Ambil data dari PostgreSQL via Prisma Server Action
+        const data = await getTemplates(user?.id);
         
-        if (user) {
-          query = query.or(`user_id.eq.${user.id},is_system.eq.true`);
-        } else {
-          query = query.eq('is_system', true);
-        }
-
-        const { data, error } = await query.order('created_at', { ascending: false });
-
-        if (error) throw error;
+        // 3. Masukkan ke dalam State React
         setTemplates(data || []);
       } catch (error) {
         console.error('Error fetching templates:', error);
