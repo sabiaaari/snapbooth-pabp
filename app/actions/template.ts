@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 
+
 // 1. Fungsi untuk mengambil semua templat (digunakan di TemplatesPage)
 export async function getTemplates(userId?: string) {
   try {
@@ -28,19 +29,45 @@ export async function getTemplates(userId?: string) {
 }
 
 // 2. Fungsi untuk mengambil 1 templat spesifik berdasarkan ID (digunakan di BoothPage)
-export async function getTemplateById(id: string, userId?: string) {
+export async function getTemplateById(templateId: string, userId?: string) {
   try {
-    const template = await prisma.template.findUnique({
-      where: { id: id }
+    const template = await prisma.template.findFirst({
+      where: {
+        id: templateId,
+        OR: [
+          { is_system: true },
+          { user_id: userId }
+        ]
+      }
     });
-    
-    // Validasi: Pastikan templat ini adalah milik sistem atau milik user yang sedang login
-    if (template && (template.is_system || template.user_id === userId)) {
-      return template;
-    }
-    return null;
+    return template;
   } catch (error) {
-    console.error('Error fetching template by ID:', error);
+    console.error("Gagal mengambil template spesifik:", error);
     return null;
+  }
+}
+
+export async function createCustomTemplate(data: {
+  name: string;
+  imageUrl: string;
+  requiredPhotos: number;
+  color: string;
+  userId: string;
+}) {
+  try {
+    const newTemplate = await prisma.template.create({
+      data: {
+        name: data.name.toUpperCase(), 
+        image_url: data.imageUrl,
+        required_photos: data.requiredPhotos,
+        is_system: false, // Menandakan ini custom buatan user
+        color: data.color,
+        user_id: data.userId
+      }
+    });
+    return { success: true, data: newTemplate };
+  } catch (error) {
+    console.error("Gagal menyimpan custom template:", error);
+    return { success: false };
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { createCustomTemplate } from '@/app/actions/template';
 import React, { useState, useEffect } from 'react';
 import { 
   Upload, 
@@ -125,97 +126,74 @@ export default function DashboardPage() {
   };
 
   const handleSaveFrame = async () => {
-    if (!user || (!selectedFrame && !previewUrl)) return;
+  if (!user || (!selectedFrame && !previewUrl)) return;
 
-    try {
-      // 1. Ubah data gambar menjadi Blob/File yang valid
-      // Kita prioritaskan selectedFrame (File), jika tidak ada gunakan previewUrl (Base64)
-      let fileToUpload: Blob | File | null = selectedFrame;
-      
-      if (!fileToUpload && previewUrl && previewUrl.startsWith('data:')) {
-        // Konversi Data URL (Base64) ke Blob jika diperlukan
-        const response = await fetch(previewUrl);
-        fileToUpload = await response.blob();
-      }
-
-      if (!fileToUpload) {
-        alert('Mohon pilih file gambar terlebih dahulu!');
-        return;
-      }
-
-      // 2. Lakukan upload fisik ke Supabase Storage
-      // Pastikan Anda sudah membuat bucket bernama 'frame-assets' di Supabase Storage
-      const fileName = `${user.id}-${Date.now()}.png`;
-      const filePath = `user_frames/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('frame-assets') // Menggunakan nama bucket 'frame-assets'
-        .upload(filePath, fileToUpload, {
-          contentType: 'image/png',
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        throw new Error(`Gagal mengupload file ke Storage: ${uploadError.message}`);
-      }
-
-      // 3. Ambil Public URL-nya
-      const { data: { publicUrl } } = supabase.storage
-        .from('frame-assets')
-        .getPublicUrl(filePath);
-
-      // 4. Simpan Public URL tersebut ke dalam tabel database Supabase
-      const frameData = {
-        user_id: user.id,
-        name: newFrame.name || 'Untitled Frame',
-        image_url: publicUrl,
-        required_photos: newFrame.requiredPhotos,
-        is_system: false,
-        created_at: new Date().toISOString(),
-      };
-
-      const { data, error } = await supabase
-        .from('templates')
-        .insert([frameData])
-        .select();
-
-      if (error) {
-        if (error.code === '42P01') {
-           // Fallback jika tabel belum dibuat (hanya untuk demo/development)
-           const mockFrame: FrameTemplate = {
-             id: Math.random().toString(36).substr(2, 9),
-             name: frameData.name,
-             image_url: frameData.image_url,
-             required_photos: frameData.required_photos,
-             is_system: false,
-             created_at: frameData.created_at,
-             color: 'bg-pink-50',
-           };
-           setUserFrames([mockFrame, ...userFrames]);
-           setIsUploading(false);
-           setNewFrame({ name: '', requiredPhotos: 4 });
-           setPreviewUrl(null);
-           setSelectedFrame(null);
-           return;
-        }
-        throw error;
-      }
-
-      if (data) {
-        setUserFrames([data[0], ...userFrames]);
-      }
-      
-      setIsUploading(false);
-      setNewFrame({ name: '', requiredPhotos: 4 });
-      setPreviewUrl(null);
-      setSelectedFrame(null);
-      alert('Frame berhasil disimpan ke Studio!');
-    } catch (error: any) {
-      console.error('Error saving frame:', error);
-      alert('Gagal menyimpan frame: ' + (error.message || 'Unknown error'));
+  try {
+    let fileToUpload: Blob | File | null = selectedFrame;
+    
+    if (!fileToUpload && previewUrl && previewUrl.startsWith('data:')) {
+      const response = await fetch(previewUrl);
+      fileToUpload = await response.blob();
     }
-  };
+
+    if (!fileToUpload) {
+      alert('Mohon pilih file gambar terlebih dahulu!');
+      return;
+    }
+
+    // 1. Upload fisik gambar ke Supabase Storage (Bucket: frame-assets)
+    const fileName = `${user.id}-${Date.now()}.png`;
+    const filePath = `user_frames/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('frame-assets')
+      .upload(filePath, fileToUpload, {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      throw new Error(`Gagal mengupload file ke Storage: ${uploadError.message}`);
+    }
+
+    // 2. Ambil Public URL dari Supabase
+    const { data: { publicUrl } } = supabase.storage
+      .from('frame-assets')
+      .getPublicUrl(filePath);
+
+    // 3. Simpan data teks ke PostgreSQL Proxmox (CT 105) via Prisma Server Action
+    const result = await createCustomTemplate({
+      name: newFrame.name || 'Untitled Frame',
+      imageUrl: publicUrl,
+      requiredPhotos: newFrame.requiredPhotos,
+      color: 'bg-pink-50',
+      userId: user.id
+    });
+
+    if (!result.success || !result.data) {
+      throw new Error("Gagal menyimpan data ke database server.");
+    }
+
+    // 4. Perbarui State lokal agar langsung tampil
+    setUserFrames([{
+      ...result.data,
+      user_id: result.data.user_id ?? undefined,
+      category: result.data.category ?? undefined,
+      color: result.data.color ?? undefined,
+      created_at: new Date(result.data.created_at).toISOString(),
+    }, ...userFrames]);
+    
+    setIsUploading(false);
+    setNewFrame({ name: '', requiredPhotos: 4 });
+    setPreviewUrl(null);
+    setSelectedFrame(null);
+    alert('Frame berhasil disimpan ke Studio!');
+  } catch (error: any) {
+    console.error('Error saving frame:', error);
+    alert('Gagal menyimpan frame: ' + (error.message || 'Unknown error'));
+  }
+};
 
   const handleDeleteFrame = async (e: React.MouseEvent, frameId: string) => {
     e.preventDefault();

@@ -1,5 +1,6 @@
 'use client';
 
+import { getTemplateById } from '@/app/actions/template';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Camera as CameraIcon, 
@@ -121,39 +122,30 @@ function BoothContent() {
   // Fetch custom template if not found in system templates
   useEffect(() => {
     const fetchCustomTemplate = async () => {
-      if (!templateIdParam || frames.find(f => f.id === templateIdParam)) return;
+  // Lewati jika tidak ada ID atau jika itu adalah template bawaan sistem yang sudah di-hardcode
+  if (!templateIdParam || frames.find(f => f.id === templateIdParam)) return;
 
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        let query = supabase.from('templates').select('*');
-        
-        if (user) {
-          query = query.or(`user_id.eq.${user.id},is_system.eq.true`);
-        } else {
-          query = query.eq('is_system', true);
-        }
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    // Gunakan Prisma Server Action, BUKAN supabase.from()
+    const data = await getTemplateById(templateIdParam, user?.id);
 
-        const { data, error } = await query
-          .eq('id', templateIdParam)
-          .single();
-
-        if (error) throw error;
-
-        if (data) {
-          setSelectedTemplate({
-            id: data.id,
-            name: data.name,
-            imageUrl: data.image_url,
-            requiredPhotos: data.required_photos,
-            thumbColor: 'bg-y2k-bg',
-            slots: data.slots || default4Slots
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching template:", err);
-      }
-    };
+    if (data) {
+      setSelectedTemplate({
+        id: data.id,
+        name: data.name,
+        imageUrl: data.image_url,
+        requiredPhotos: data.required_photos,
+        thumbColor: data.color || 'bg-y2k-bg',
+        // Gunakan fallback defaultSlots sesuai jumlah foto karena koordinat slot belum masuk database
+        slots: data.required_photos === 6 ? default6Slots : default4Slots 
+      });
+    }
+  } catch (err) {
+    console.error("Error fetching template:", err);
+  }
+};
 
     fetchCustomTemplate();
   }, [templateIdParam]);
