@@ -13,13 +13,25 @@ datasource db {
 }
 
 model Template {
-  id              String   @id @default(uuid())
-  user_id         String?
+  id              String   @id @default(cuid())
   name            String
-  image_url       String
-  required_photos Int      @default(4)
+  image_url       String // URL ke frame PNG di Supabase Storage
+  required_photos Int // Jumlah slot foto (menggantikan 'slots')
   is_system       Boolean  @default(false)
-  category        String?
-  color           String?
+  color           String? // Warna background untuk UI list template
+  user_id         String? // ID dari Supabase Auth pengguna yang login
   created_at      DateTime @default(now())
+
+  // Relasi: Satu template bisa memiliki banyak hasil foto
+  results Result[]
+}
+
+model Result {
+  id         String   @id @default(cuid())
+  photo_url  String // URL ke hasil foto gabungan akhir di Storage
+  created_at DateTime @default(now())
+
+  // Relasi kembali ke Template mana yang dipakai
+  template_id String
+  template    Template @relation(fields: [template_id], references: [id])
 }
