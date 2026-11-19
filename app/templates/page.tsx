@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { useSession } from 'next-auth/react';
 // IMPORT SERVER ACTION UNTUK PRISMA:
 import { getTemplates } from '@/app/actions/template';
 
@@ -23,6 +23,7 @@ export type Template = {
 
 export default function TemplatesPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,13 +31,10 @@ export default function TemplatesPage() {
     const fetchTemplates = async () => {
       setIsLoading(true);
       try {
-        // 1. Cek sesi login (Tetap menggunakan Supabase Auth)
-        const { data: { user } } = await supabase.auth.getUser();
+        // Ambil data dari PostgreSQL via Prisma Server Action
+        const data = await getTemplates(session?.user?.id);
         
-        // 2. Ambil data dari PostgreSQL via Prisma Server Action
-        const data = await getTemplates(user?.id);
-        
-        // 3. Masukkan ke dalam State React
+        // Masukkan ke dalam State React
         setTemplates(data || []);
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -46,7 +44,7 @@ export default function TemplatesPage() {
     };
 
     fetchTemplates();
-  }, []);
+  }, [session?.user?.id]);
 
   const handleSelectTemplate = (templateId: string, requiredPhotos: number) => {
     router.push(`/booth?templateId=${templateId}&slots=${requiredPhotos}`);

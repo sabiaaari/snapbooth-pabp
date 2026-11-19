@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { FrameTemplate } from '../booth/page';
 import { useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useSession } from 'next-auth/react';
 // IMPORT SERVER ACTION UNTUK PRISMA:
 import { getTemplateById } from '@/app/actions/template';
 
@@ -46,6 +46,7 @@ export default function ResultPage() {
 function ResultContent() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('templateId');
+  const { data: session } = useSession();
 
   const [photos, setPhotos] = useState<string[]>([]);
   const [template, setTemplate] = useState<FrameTemplate | null>(null);
@@ -267,11 +268,8 @@ function ResultContent() {
       if (!templateId) return;
 
       try {
-        // Cek user login tetap menggunakan Supabase Auth
-        const { data: { user } } = await supabase.auth.getUser();
-
-        // Ambil data template dari PostgreSQL (CT 105) via Prisma Server Action
-        const data = await getTemplateById(templateId, user?.id);
+        // Ambil data template dari PostgreSQL via Prisma Server Action
+        const data = await getTemplateById(templateId, session?.user?.id);
 
         if (!data) {
           // Jika tidak ada di database, cek apakah ini template custom yang tersimpan di localStorage
@@ -300,7 +298,7 @@ function ResultContent() {
     };
 
     fetchTemplate();
-  }, [templateId]);
+  }, [templateId, session?.user?.id]);
 
   // RENDER ENGINE
   useEffect(() => {

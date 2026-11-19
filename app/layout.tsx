@@ -3,6 +3,7 @@ import { Pacifico, Bitter, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { Providers } from "@/components/providers"
 
 const logoFont = Pacifico({
   weight: "400",
@@ -31,11 +32,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${logoFont.variable} ${headingFont.variable} ${serifFont.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${logoFont.variable} ${headingFont.variable} ${serifFont.variable} h-full antialiased`}
+    >
       <body className="min-h-screen bg-y2k-bg font-serif text-y2k-primary flex flex-col">
-        <Navbar />
-        <main className="pt-32 pb-20 flex-1">{children}</main>
-        <Footer />
+        <Providers>
+          <Navbar />
+          <main className="pt-32 pb-20 flex-1">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

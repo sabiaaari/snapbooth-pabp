@@ -1,6 +1,6 @@
 'use client';
 
-import { createCustomTemplate } from '@/app/actions/template';
+import { createCustomTemplate, getTemplates, deleteCustomTemplate } from '@/app/actions/template';
 import React, { useState, useEffect } from 'react';
 import { 
   Upload, 
@@ -24,8 +24,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 export type FrameTemplate = {
   id: string;
@@ -33,17 +33,16 @@ export type FrameTemplate = {
   image_url: string;
   required_photos: number;
   is_system: boolean;
-  user_id?: string;
-  category?: string;
-  created_at: string;
-  color?: string;
+  user_id?: string | null;
+  category?: string | null;
+  created_at: string | Date;
+  color?: string | null;
 };
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const { data: session, status } = useSession();
   const [userFrames, setUserFrames] = useState<FrameTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [profileName, setProfileName] = useState('');
   const router = useRouter();
 
   const [isUploading, setIsUploading] = useState(false);
@@ -54,44 +53,35 @@ export default function DashboardPage() {
     requiredPhotos: 4,
   });
 
+  const user = session?.user;
+  const profileName = user?.name || user?.email?.split('@')[0] || 'User';
+
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push('/login');
-        return;
-      }
+    if (status === 'loading') return;
 
-      setUser(session.user);
-      setProfileName(session.user.user_metadata?.username || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User');
-      
-      // Fetch user's templates
-      fetchTemplates(session.user.id);
-    };
+    if (status === 'unauthenticated' || !session) {
+      router.push('/login');
+      return;
+    }
 
-    checkUser();
-  }, [router]);
+    if (session.user?.id) {
+      fetchUserTemplates(session.user.id);
+    } else {
+      setIsLoading(false);
+    }
+  }, [status, session, router]);
 
-  const fetchTemplates = async (userId: string) => {
+  const fetchUserTemplates = async (userId: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('templates')
-        .select('*')
-        .or(`user_id.eq.${userId},is_system.eq.true`)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        // Check for "relation does not exist" error (code 42P01)
-        if (error.code === '42P01') {
-          console.warn('The "templates" table does not exist in your Supabase database. Falling back to local state.');
-          setUserFrames([]);
-          return;
-        }
-        throw error;
-      }
-      setUserFrames(data || []);
+      const data = await getTemplates(userId);
+      setUserFrames(
+        (data || []).map((t) => ({
+          ...t,
+          category: t.is_system ? 'Official' : 'Custom',
+          created_at: typeof t.created_at === 'string' ? t.created_at : new Date(t.created_at).toISOString(),
+        }))
+      );
     } catch (error: any) {
       console.error('Error fetching templates:', error);
     } finally {
@@ -121,8 +111,7 @@ export default function DashboardPage() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
+    await signOut({ callbackUrl: '/' });
   };
 
   const handleSaveFrame = async () => {
@@ -141,45 +130,40 @@ export default function DashboardPage() {
       return;
     }
 
-    // 1. Upload fisik gambar ke Supabase Storage (Bucket: frame-assets)
-    const fileName = `${user.id}-${Date.now()}.png`;
-    const filePath = `user_frames/${fileName}`;
+    // 1. Upload fisik gambar ke backend storage via API route
+    const formData = new FormData();
+    formData.append('file', fileToUpload, (fileToUpload as File).name || 'custom-frame.png');
 
-    const { error: uploadError } = await supabase.storage
-      .from('frame-assets')
-      .upload(filePath, fileToUpload, {
-        contentType: 'image/png',
-        cacheControl: '3600',
-        upsert: false
-      });
+    const uploadRes = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
 
-    if (uploadError) {
-      throw new Error(`Gagal mengupload file ke Storage: ${uploadError.message}`);
+    const uploadData = await uploadRes.json();
+    if (!uploadRes.ok || !uploadData.url) {
+      throw new Error(uploadData.error || 'Gagal mengupload file ke storage.');
     }
 
-    // 2. Ambil Public URL dari Supabase
-    const { data: { publicUrl } } = supabase.storage
-      .from('frame-assets')
-      .getPublicUrl(filePath);
+    const publicUrl = uploadData.url;
 
-    // 3. Simpan data teks ke PostgreSQL Proxmox (CT 105) via Prisma Server Action
+    // 2. Simpan data teks ke database via Prisma Server Action
     const result = await createCustomTemplate({
       name: newFrame.name || 'Untitled Frame',
       imageUrl: publicUrl,
       requiredPhotos: newFrame.requiredPhotos,
       color: 'bg-pink-50',
-      userId: user.id
+      userId: user.id!
     });
 
     if (!result.success || !result.data) {
       throw new Error("Gagal menyimpan data ke database server.");
     }
 
-    // 4. Perbarui State lokal agar langsung tampil
+    // 3. Perbarui State lokal agar langsung tampil
     setUserFrames([{
       ...result.data,
       user_id: result.data.user_id ?? undefined,
-      category: result.data.category ?? undefined,
+      category: 'Custom',
       color: result.data.color ?? undefined,
       created_at: new Date(result.data.created_at).toISOString(),
     }, ...userFrames]);
@@ -201,13 +185,10 @@ export default function DashboardPage() {
     if (!confirm('Are you sure you want to delete this template?')) return;
 
     try {
-      const { error } = await supabase
-        .from('templates')
-        .delete()
-        .eq('id', frameId)
-        .eq('user_id', user.id);
+      if (!user?.id) throw new Error('User tidak terautentikasi');
 
-      if (error) throw error;
+      const res = await deleteCustomTemplate(frameId, user.id);
+      if (!res.success) throw new Error('Gagal menghapus template dari database.');
 
       setUserFrames(userFrames.filter(f => f.id !== frameId));
     } catch (error: any) {
@@ -216,7 +197,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (isLoading && !user) {
+  if ((status === 'loading' || isLoading) && !user) {
     return (
       <div className="min-h-[60vh] flex flex-col justify-center items-center gap-4 text-y2k-primary">
         <Sparkles className="animate-spin" size={48} />

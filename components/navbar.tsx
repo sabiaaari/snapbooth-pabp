@@ -2,16 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Camera, Plus, User, LogOut, Star, Menu, X } from 'lucide-react';
+import { User, LogOut, Star, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 export function Navbar() {
-  const [user, setUser] = useState<any>(null);
+  const { data: session } = useSession();
+  const user = session?.user;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,27 +23,14 @@ export function Navbar() {
 
     window.addEventListener('scroll', handleScroll);
 
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
-    };
-
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      subscription.unsubscribe();
     };
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
     setIsMenuOpen(false);
-    router.push('/');
+    await signOut({ callbackUrl: '/' });
   };
 
   return (

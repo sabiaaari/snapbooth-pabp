@@ -2,8 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 
-
-// 1. Fungsi untuk mengambil semua templat (digunakan di TemplatesPage)
+// 1. Fungsi untuk mengambil semua templat (digunakan di TemplatesPage dan DashboardPage)
 export async function getTemplates(userId?: string) {
   try {
     if (userId) {
@@ -47,6 +46,7 @@ export async function getTemplateById(templateId: string, userId?: string) {
   }
 }
 
+// 3. Fungsi untuk membuat custom template (digunakan di DashboardPage)
 export async function createCustomTemplate(data: {
   name: string;
   imageUrl: string;
@@ -68,6 +68,23 @@ export async function createCustomTemplate(data: {
     return { success: true, data: newTemplate };
   } catch (error) {
     console.error("Gagal menyimpan custom template:", error);
+    return { success: false };
+  }
+}
+
+// 4. Fungsi untuk menghapus custom template milik user (digunakan di DashboardPage)
+export async function deleteCustomTemplate(templateId: string, userId: string) {
+  try {
+    await prisma.template.deleteMany({
+      where: {
+        id: templateId,
+        user_id: userId,
+        is_system: false,
+      }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Gagal menghapus custom template:", error);
     return { success: false };
   }
 }

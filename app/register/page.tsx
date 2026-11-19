@@ -2,15 +2,16 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Sparkles, User, Mail, Lock } from "lucide-react";
+import { ChevronLeft, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const router = useRouter();
@@ -44,66 +45,41 @@ export default function RegisterPage() {
     setMessage(null);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username,
-          },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        }
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: username, // Dikirim sebagai 'name' sesuai kolom di model User Prisma
+          email,
+          password,
+        }),
       });
 
-      if (error) {
-        console.error('Supabase Auth Error (Register):', error.message, error);
-        alert(`Registration Error: ${error.message}`);
-        throw error;
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to register.');
       }
 
-      if (data.user) {
-        const { error: profileError } =
-          await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              username: username,
-              email: email,
-              provider: 'email',
-            });
-
-        if (profileError) {
-          console.error('Supabase DB Error (Profile Creation):', profileError.message, profileError);
-          alert(`Profile Creation Error: ${profileError.message}`);
-          throw profileError;
-        }
-      }
-
-      setMessage({ type: 'success', text: 'Registration successful! Please check your email for verification.' });
+      setMessage({
+        type: 'success',
+        text: data.message || 'Registration successful! Please check your email for verification.',
+      });
     } catch (error: any) {
-      console.error('Registration error:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to register.' });
+      setMessage({
+        type: 'error',
+        text: error.message || 'Failed to register.',
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-      if (error) {
-        console.error('Supabase Auth Error (Google Register):', error.message, error);
-        alert(`Google Registration Error: ${error.message}`);
-        throw error;
-      }
+      await signIn('google', { callbackUrl: '/dashboard' });
     } catch (error: any) {
-      console.error('Google login failed:', error);
       setMessage({ type: 'error', text: 'Google login failed.' });
       setIsLoading(false);
     }
@@ -166,14 +142,24 @@ export default function RegisterPage() {
               <label className="text-[9px] font-black uppercase tracking-widest ml-2 flex items-center gap-2">
                 <Lock size={10} /> Password
               </label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-10 px-5 rounded-xl border-2 border-y2k-primary bg-white font-bold text-sm text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none transition-all shadow-[3px_3px_0_0_#2F020C]"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-10 pl-5 pr-11 rounded-xl border-2 border-y2k-primary bg-white font-bold text-sm text-y2k-primary placeholder:text-y2k-primary/20 focus:outline-none transition-all shadow-[3px_3px_0_0_#2F020C]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-y2k-primary/60 hover:text-y2k-primary transition-colors p-1"
+                >
+                  {showPassword ? <EyeOff size={18} strokeWidth={2.5} /> : <Eye size={18} strokeWidth={2.5} />}
+                </button>
+              </div>
 
               {/* Password Requirements Checklist */}
               <div className="grid grid-cols-2 gap-0.5 px-2 pt-1">
