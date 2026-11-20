@@ -1,19 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'sdvgbmoahxkrwwwpzrsp.supabase.co',
-        port: '',
-        pathname: '/storage/v1/object/public/**',
-      },
-    ],
-  },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/uploads/:filename",
+        destination: "/api/uploads/:filename",
+      },
+    ];
   },
 };
 
