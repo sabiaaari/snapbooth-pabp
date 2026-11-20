@@ -510,9 +510,9 @@ function ResultContent() {
         <div className="w-full flex flex-col lg:flex-row gap-8 lg:gap-12 items-start justify-center">
           {/* Photo Strip Column (Main Content) */}
           <div className="flex-1 min-w-0 flex flex-col items-center">
-            <div className="relative group w-full h-[60vh] lg:h-[75vh] max-w-[280px] mx-auto flex justify-center items-center min-h-0">
+            <div className="relative group inline-flex justify-center items-center mx-auto">
               <div className="absolute -inset-4 bg-y2k-primary/10 rounded-[4rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative h-full aspect-[1/3] bg-white overflow-hidden shadow-[12px_12px_0_0_#2F020C] rounded-md flex-shrink-0 border-4 border-y2k-primary min-h-0 flex items-center justify-center">
+              <div className="relative w-fit h-fit bg-white overflow-hidden shadow-[12px_12px_0_0_#2F020C] rounded-md border-4 border-y2k-primary flex items-center justify-center">
                 <canvas
                   ref={canvasRef}
                   onMouseDown={handleMouseDown}
@@ -521,7 +521,7 @@ function ResultContent() {
                   onMouseLeave={handleMouseUp}
                   onWheel={handleWheel}
                   onClick={handleCanvasClick}
-                  className="max-h-full max-w-full w-auto h-auto object-contain cursor-move transition-transform duration-500 hover:scale-[1.01]"
+                  className="block max-h-[65vh] lg:max-h-[75vh] max-w-[85vw] lg:max-w-[460px] w-auto h-auto cursor-move transition-transform duration-500 hover:scale-[1.01]"
                 />
                 <input
                   type="file"
